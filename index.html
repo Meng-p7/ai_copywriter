@@ -859,6 +859,66 @@
             padding: 40px 20px;
         }
 
+        /* 新版本提示弹窗样式 */
+        #newVersionModal .update-content {
+            max-width: 450px;
+        }
+
+        .new-version-info {
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        .new-version-info p {
+            margin: 10px 0;
+            font-size: 16px;
+        }
+
+        .new-version-info strong {
+            color: var(--text-secondary);
+        }
+
+        .new-version-info span {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .update-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .btn-primary, .btn-secondary {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, #ff8e53 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(255, 107, 107, 0.3);
+        }
+
+        .btn-secondary {
+            background-color: var(--bg-light);
+            color: var(--text-secondary);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--border);
+        }
+
         /* 用户信息样式 */
         .user-info {
             display: flex;
@@ -1309,8 +1369,35 @@
         </div>
     </div>
 
+    <!-- 新版本提示弹窗 -->
+    <div class="update-modal" id="newVersionModal">
+        <div class="update-content">
+            <div class="update-header">
+                <div class="update-title">
+                    🎉 发现新版本！
+                </div>
+                <button class="update-close" onclick="closeNewVersionModal()">&times;</button>
+            </div>
+            
+            <div class="update-item">
+                <div class="new-version-info">
+                    <p><strong>当前版本：</strong> <span id="currentVersionDisplay"></span></p>
+                    <p><strong>最新版本：</strong> <span id="latestVersionDisplay"></span></p>
+                </div>
+                <div class="update-buttons">
+                    <button class="btn-primary" onclick="goToDownload()">去下载</button>
+                    <button class="btn-secondary" onclick="closeNewVersionModal()">稍后再说</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         const API_URL = "/api/script/create";
+        // 版本信息
+        const APP_VERSION = "1.0.0";
+        const GITHUB_REPO = "Meng-p7/ai_copywriter"; // 记得改成你的 GitHub 用户名
+        
         // 用户信息（单机版用固定ID）
         let USER_ID = "local_user_fixed_id_2026";
         let userName = "";
@@ -1329,6 +1416,54 @@
                 userName = "创作者";
                 document.getElementById('userNameDisplay').textContent = userName;
             }
+        }
+
+        // 检查更新
+        async function checkForUpdates() {
+            try {
+                const response = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/releases/latest`);
+                if (!response.ok) return;
+                
+                const data = await response.json();
+                const latestVersion = data.tag_name.replace('v', '');
+                
+                if (isNewerVersion(latestVersion, APP_VERSION)) {
+                    showNewVersionModal(APP_VERSION, latestVersion);
+                }
+            } catch (e) {
+                console.log('检查更新失败:', e);
+            }
+        }
+
+        // 比较版本号
+        function isNewerVersion(latest, current) {
+            const latestParts = latest.split('.').map(Number);
+            const currentParts = current.split('.').map(Number);
+            
+            for (let i = 0; i < Math.max(latestParts.length, currentParts.length); i++) {
+                const l = latestParts[i] || 0;
+                const c = currentParts[i] || 0;
+                if (l > c) return true;
+                if (l < c) return false;
+            }
+            return false;
+        }
+
+        // 显示新版本提示
+        function showNewVersionModal(current, latest) {
+            document.getElementById('currentVersionDisplay').textContent = 'v' + current;
+            document.getElementById('latestVersionDisplay').textContent = 'v' + latest;
+            document.getElementById('newVersionModal').classList.add('show');
+        }
+
+        // 关闭新版本提示
+        function closeNewVersionModal() {
+            document.getElementById('newVersionModal').classList.remove('show');
+        }
+
+        // 跳转到下载页面
+        function goToDownload() {
+            window.open(`https://github.com/${GITHUB_REPO}/releases/latest`, '_blank');
         }
         
         // 显示昵称设置弹窗
@@ -1558,6 +1693,11 @@
         document.addEventListener('DOMContentLoaded', function() {
             // 初始化用户信息
             initUser();
+            
+            // 检查更新
+            setTimeout(() => {
+                checkForUpdates();
+            }, 1000);
             
             // 按Enter键保存昵称
             const nicknameInput = document.getElementById('nicknameInput');
