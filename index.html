@@ -1,0 +1,1994 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI拍</title>
+    <style>
+        :root {
+            --primary: #FF8C38; /* 暖橙主色 */
+            --primary-light: #FFE0C0; /* 浅橙背景 */
+            --primary-dark: #E67320; /* 深橙hover */
+            --text-main: #333333; /* 主文本 */
+            --text-secondary: #666666; /* 次文本 */
+            --text-hint: #999999; /* 提示文本 */
+            --border: #F0D0B0; /* 边框色 */
+            --success: #52C41A; /* 成功色 */
+            --camera: #4096ff; /* 镜头色 浅蓝 */
+            --dialogue: #722ed1; /* 台词色 紫 */
+            --music: #fa8c16; /* 音乐色 橙黄 */
+            --radius: 12px; /* 统一圆角 */
+            --shadow: 0 4px 12px rgba(255, 140, 56, 0.15); /* 暖色调阴影 */
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+        }
+
+        body {
+            background-color: #FFF9F5; /* 暖白底色 */
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 30px 20px;
+            color: var(--text-main);
+        }
+
+        .app-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .app-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        .app-subtitle {
+            font-size: 16px;
+            color: var(--text-secondary);
+        }
+
+        .card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .form-item {
+            margin-bottom: 20px;
+        }
+
+        .label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-main);
+            font-size: 15px;
+        }
+
+        .hint {
+            font-size: 12px;
+            color: var(--text-hint);
+            margin-top: 4px;
+            display: block;
+        }
+
+        select, textarea, input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 16px;
+            color: var(--text-main);
+            background-color: white;
+            transition: border 0.3s ease;
+        }
+
+        select:focus, textarea:focus, input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(255, 140, 56, 0.2);
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+            line-height: 1.6;
+        }
+
+        /* 场景卡片选择器样式 */
+        .scene-selector {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .scene-card {
+            padding: 16px 20px;
+            background-color: white;
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-size: 14px;
+            color: var(--text-main);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .scene-card:hover {
+            border-color: var(--primary);
+            background-color: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 140, 56, 0.2);
+        }
+
+        .scene-card.active {
+            border-color: var(--primary);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 6px 16px rgba(255, 140, 56, 0.35);
+            transform: scale(1.02);
+        }
+
+        .scene-card.active::after {
+            content: "✓";
+            position: absolute;
+            top: 4px;
+            right: 8px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .scene-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .form-row .form-item {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        .generate-btn {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .generate-btn:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(255, 140, 56, 0.25);
+        }
+
+        .generate-btn:disabled {
+            background-color: var(--primary-light);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+
+        .btn-history {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #6f42c1, #5a32a3);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn-history:hover {
+            background: linear-gradient(135deg, #5a32a3, #4a278a);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(111, 66, 193, 0.3);
+        }
+
+        .result-card {
+            position: relative;
+            min-height: 300px;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 12px;
+            border-bottom: 1px dashed var(--border);
+        }
+
+        .result-title {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .copy-btn {
+            background: none;
+            border: none;
+            color: var(--primary);
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: color 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            color: var(--primary-dark);
+        }
+
+        /* 脚本样式核心优化 */
+        .result-content {
+            font-size: 16px;
+            line-height: 1.8;
+            color: var(--text-main);
+            height: calc(100% - 40px);
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .script-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--primary);
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--primary-light);
+        }
+
+        .music-suggestion {
+            background-color: #FFF5EB;
+            border-left: 4px solid var(--music);
+            padding: 12px 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            color: var(--music);
+        }
+
+        .music-suggestion-label {
+            font-weight: 600;
+            margin-right: 8px;
+        }
+
+        .shot-item {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #FFF5EB;
+            border-radius: 8px;
+            border-left: 4px solid var(--camera);
+        }
+
+        .shot-num {
+            font-weight: 600;
+            color: var(--camera);
+            margin-bottom: 8px;
+            font-size: 18px;
+        }
+
+        .shot-label {
+            font-weight: 600;
+            display: inline-block;
+            width: 60px;
+        }
+
+        .shot-camera {
+            color: var(--camera);
+            margin-bottom: 5px;
+        }
+
+        .shot-dialogue {
+            color: var(--dialogue);
+            margin-bottom: 5px;
+        }
+
+        .shot-music {
+            color: var(--music);
+            background-color: rgba(250, 140, 22, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .empty-hint {
+            color: var(--text-hint);
+            font-style: italic;
+        }
+
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 160px;
+            color: var(--text-hint);
+        }
+
+        .loading-dots {
+            display: flex;
+            gap: 4px;
+            margin-top: 12px;
+        }
+
+        .loading-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--primary-light);
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+
+        .loading-dot:nth-child(1) { animation-delay: -0.32s; }
+        .loading-dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+
+        .success-toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--success);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        .success-toast.show {
+            opacity: 1;
+        }
+
+        /* 历史记录弹窗样式 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: var(--radius);
+            width: 90%;
+            max-width: 700px;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 28px;
+            color: var(--text-hint);
+            cursor: pointer;
+            transition: color 0.3s ease;
+            line-height: 1;
+        }
+
+        .modal-close:hover {
+            color: var(--text-main);
+        }
+
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .history-item {
+            background-color: #FFF9F5;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .history-item:hover {
+            box-shadow: 0 4px 12px rgba(255, 140, 56, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .history-scene {
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 16px;
+        }
+
+        .history-time {
+            font-size: 12px;
+            color: var(--text-hint);
+        }
+
+        .history-info {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .history-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .history-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .history-btn-view {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .history-btn-view:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .history-btn-delete {
+            background-color: #ff4d4f;
+            color: white;
+        }
+
+        .history-btn-delete:hover {
+            background-color: #d9363e;
+        }
+
+        .empty-history {
+            text-align: center;
+            color: var(--text-hint);
+            padding: 40px 20px;
+        }
+
+        /* 多方案卡片滑动样式 - 核心修复：动态居中 + 自适应 */
+        .schemes-container {
+            position: relative;
+            overflow: hidden;
+            padding: 20px 0;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .schemes-wrapper {
+            display: flex;
+            align-items: center;
+            transition: transform 0.4s ease;
+            padding: 10px 0;
+            min-height: 420px;
+            position: relative;
+            width: 100%;
+            /* 关键：初始位置重置 */
+            left: 0;
+            transform: translateX(0);
+        }
+
+        .scheme-card {
+            flex-shrink: 0;
+            /* 关键：改为相对宽度，适配不同屏幕 */
+            width: calc(100% - 40px);
+            max-width: 600px;
+            min-height: 400px;
+            background: white;
+            border-radius: var(--radius);
+            padding: 40px 24px 24px 24px;
+            box-shadow: var(--shadow);
+            border: 2px solid var(--border);
+            transition: all 0.4s ease;
+            /* 关键：移除固定margin，改为动态间距 */
+            margin: 0 10px;
+            position: relative;
+            overflow-y: visible;
+        }
+
+        .scheme-card.active {
+            border-color: var(--primary);
+            box-shadow: 0 8px 24px rgba(255, 140, 56, 0.3);
+            transform: scale(1);
+            z-index: 10;
+            opacity: 1;
+            filter: blur(0);
+        }
+
+        .scheme-card.inactive {
+            opacity: 0.45;
+            filter: blur(3px);
+            transform: scale(0.88);
+            z-index: 1;
+        }
+
+        .scheme-card.hidden {
+            display: none;
+        }
+
+        .scheme-label {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, var(--camera) 0%, #1890ff 100%);
+            color: white;
+            padding: 8px 24px;
+            border-radius: 20px;
+            font-size: 20px;
+            font-weight: 700;
+            z-index: 11;
+            box-shadow: 0 4px 12px rgba(64, 150, 255, 0.35);
+        }
+
+        .scheme-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #ffffff 0%, #fff9f5 100%);
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 20;
+            font-size: 24px;
+            color: var(--primary);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .scheme-nav.prev {
+            left: 10px;
+        }
+
+        .scheme-nav.next {
+            right: 10px;
+        }
+
+        .scheme-nav:hover {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            transform: translateY(-50%) scale(1.1);
+            box-shadow: 0 6px 20px rgba(255, 140, 56, 0.4);
+        }
+
+        .scheme-nav:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            transform: translateY(-50%) scale(1);
+        }
+
+        .scheme-nav:active {
+            transform: translateY(-50%) scale(0.95);
+        }
+
+        .scheme-dots {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .scheme-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--border);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .scheme-dot.active {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            transform: scale(1.4);
+            box-shadow: 0 4px 12px rgba(255, 140, 56, 0.4);
+        }
+
+        .scheme-dot:hover {
+            background: var(--primary-dark);
+            transform: scale(1.2);
+        }
+
+        /* 收藏按钮样式 */
+        .favorite-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: white;
+            border: none;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            z-index: 12;
+        }
+
+        .favorite-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .favorite-btn.active {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a5a 100%);
+            color: white;
+        }
+
+        /* 我的收藏按钮样式 */
+        .btn-favorites {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a5a 100%);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn-favorites:hover {
+            background: linear-gradient(135deg, #ee5a5a 0%, #d94444 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(238, 90, 90, 0.3);
+        }
+
+        /* 收藏弹窗样式 */
+        .favorites-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2500;
+        }
+
+        .favorites-modal.show {
+            display: flex;
+        }
+
+        .favorites-content {
+            background: white;
+            border-radius: var(--radius);
+            padding: 30px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        .favorites-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .favorites-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #ff6b6b;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .favorite-item {
+            background-color: #FFF9F5;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .favorite-item:hover {
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .favorite-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .favorite-item-scene {
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 14px;
+        }
+
+        .favorite-item-time {
+            font-size: 12px;
+            color: var(--text-hint);
+        }
+
+        .favorite-item-info {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+
+        .favorite-item-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .favorite-btn-view {
+            padding: 6px 12px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .favorite-btn-view:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .favorite-btn-delete {
+            padding: 6px 12px;
+            background-color: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .favorite-btn-delete:hover {
+            background-color: #ee5a5a;
+        }
+
+        .empty-favorites {
+            text-align: center;
+            color: var(--text-hint);
+            padding: 40px 20px;
+        }
+
+        /* 用户信息样式 */
+        .user-info {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            margin-bottom: 15px;
+            gap: 10px;
+        }
+
+        .user-name {
+            font-size: 14px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .user-name span {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .btn-edit-name {
+            background: none;
+            border: none;
+            color: var(--text-hint);
+            cursor: pointer;
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-edit-name:hover {
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+
+        /* 昵称设置弹窗样式 */
+        .nickname-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .nickname-modal.show {
+            display: flex;
+        }
+
+        .nickname-content {
+            background: white;
+            border-radius: var(--radius);
+            padding: 30px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        .nickname-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .nickname-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 16px;
+            margin-bottom: 20px;
+            transition: border 0.3s ease;
+        }
+
+        .nickname-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .nickname-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nickname-btn:hover {
+            background-color: var(--primary-dark);
+        }
+
+        /* 更新公告样式 */
+        .update-notice {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+        }
+
+        .update-notice-btn {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            box-shadow: 0 4px 12px rgba(255, 140, 56, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .update-notice-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 16px rgba(255, 140, 56, 0.4);
+        }
+
+        .update-notice-btn .badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ff4d4f;
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+
+        /* 更新公告弹窗 */
+        .update-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 3000;
+        }
+
+        .update-modal.show {
+            display: flex;
+        }
+
+        .update-content {
+            background: white;
+            border-radius: var(--radius);
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        .update-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .update-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .update-close {
+            background: none;
+            border: none;
+            font-size: 40px;
+            color: var(--text-hint);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            line-height: 1;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .update-close:hover {
+            color: var(--text-main);
+            background-color: var(--primary-light);
+        }
+
+        .update-version {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .update-item {
+            margin-bottom: 25px;
+        }
+
+        .update-date {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .update-features {
+            list-style: none;
+            padding: 0;
+        }
+
+        .update-features li {
+            padding: 8px 0;
+            padding-left: 24px;
+            position: relative;
+            color: var(--text-main);
+        }
+
+        .update-features li:before {
+            content: "✨";
+            position: absolute;
+            left: 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- 更新公告按钮 -->
+    <div class="update-notice">
+        <button class="update-notice-btn" onclick="showUpdateModal()">
+            📝
+            <span class="badge">NEW</span>
+        </button>
+    </div>
+
+    <div class="app-header">
+        <h1 class="app-title">AI拍</h1>
+        <p class="app-subtitle">一键生成高转化短视频脚本与营销文案</p>
+    </div>
+
+    <!-- 用户信息区域 -->
+    <div class="user-info" id="userInfo">
+        <div class="user-name">
+            👤 <span id="userNameDisplay">游客</span>
+        </div>
+        <button class="btn-edit-name" onclick="showNicknameModal()">修改昵称</button>
+    </div>
+
+    <div class="card">
+        <div class="form-item">
+            <label class="label">创作场景</label>
+            <div class="scene-selector" id="sceneSelector">
+                <div class="scene-card" data-value="餐饮短视频脚本">
+                    <span class="scene-icon">🍜</span>
+                    餐饮探店·短视频脚本
+                </div>
+                <div class="scene-card" data-value="美业门店短视频">
+                    <span class="scene-icon">💅</span>
+                    美业美甲·门店推广
+                </div>
+                <div class="scene-card" data-value="跨境电商社媒文案">
+                    <span class="scene-icon">🛒</span>
+                    跨境电商·社媒种草
+                </div>
+                <div class="scene-card" data-value="知识博主口播脚本">
+                    <span class="scene-icon">📚</span>
+                    知识博主·干货口播
+                </div>
+                <div class="scene-card" data-value="本地生活团购文案">
+                    <span class="scene-icon">🎫</span>
+                    本地生活·团购套餐
+                </div>
+                <div class="scene-card" data-value="文旅探店短视频">
+                    <span class="scene-icon">🏛️</span>
+                    文旅探店·景点讲解
+                </div>
+            </div>
+            <input type="hidden" id="scene" value="餐饮短视频脚本">
+        </div>
+
+        <!-- 新增：风格选择 + 视频时长 -->
+        <div class="form-row">
+            <div class="form-item">
+                <label class="label">创作风格</label>
+                <select id="style">
+                    <option value="口语化">口语化（默认）</option>
+                    <option value="专业化">专业化</option>
+                    <option value="搞笑风">搞笑风</option>
+                    <option value="煽情风">煽情风</option>
+                </select>
+            </div>
+            <div class="form-item">
+                <label class="label">视频时长</label>
+                <select id="duration">
+                    <option value="15秒" selected>15秒（默认）</option>
+                    <option value="30秒">30秒</option>
+                    <option value="60秒">60秒</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-item">
+            <label class="label">核心卖点</label>
+            <textarea id="keyInfo" placeholder="请详细描述产品/服务的核心优势、价格、活动、目标人群等，越具体生成效果越好！"></textarea>
+            <span class="hint">示例：卢浮宫讲解5分钟快速了解镇馆三宝，适合旅游博主口播</span>
+        </div>
+
+        <button class="generate-btn" onclick="generateScript()">
+            <span>生成文案</span>
+        </button>
+
+        <div class="btn-group">
+            <button class="btn-history" onclick="showHistory()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                历史记录
+            </button>
+            <button class="btn-favorites" onclick="showFavorites()">
+                ❤️
+                我的收藏
+            </button>
+        </div>
+    </div>
+
+    <div class="card result-card">
+        <div class="result-header">
+            <h3 class="result-title">生成结果</h3>
+            <button class="copy-btn" onclick="copyResult()" id="copyBtn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+                复制文案
+            </button>
+        </div>
+        <div class="schemes-container">
+            <button class="scheme-nav prev" onclick="prevScheme()" id="prevBtn" disabled>
+                &#8249;
+            </button>
+            <div class="schemes-wrapper" id="schemesWrapper">
+                <div class="scheme-card active" id="singleResult">
+                    <div class="result-content" id="result">
+                        点击上方「生成文案」按钮，优质脚本将在此呈现...
+                    </div>
+                </div>
+            </div>
+            <button class="scheme-nav next" onclick="nextScheme()" id="nextBtn" disabled>
+                &#8250;
+            </button>
+        </div>
+        <div class="scheme-dots" id="schemeDots"></div>
+    </div>
+
+    <div class="success-toast" id="toast">复制成功！</div>
+
+    <!-- 历史记录弹窗 -->
+    <div class="modal-overlay" id="historyModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">历史记录</h3>
+                <button class="modal-close" onclick="closeHistory()">&times;</button>
+            </div>
+            <div class="modal-body" id="historyList">
+                <!-- 历史记录列表将在这里动态加载 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 昵称设置弹窗 -->
+    <div class="nickname-modal" id="nicknameModal">
+        <div class="nickname-content">
+            <h3 class="nickname-title">设置你的昵称</h3>
+            <input type="text" class="nickname-input" id="nicknameInput" placeholder="请输入你的昵称">
+            <button class="nickname-btn" onclick="saveNickname()">保存</button>
+        </div>
+    </div>
+
+    <!-- 我的收藏弹窗 -->
+    <div class="favorites-modal" id="favoritesModal">
+        <div class="favorites-content">
+            <div class="favorites-header">
+                <div class="favorites-title">
+                    ❤️ 我的收藏
+                </div>
+                <button class="update-close" onclick="closeFavorites()">&times;</button>
+            </div>
+            <div id="favoritesList">
+                <div class="empty-favorites">
+                    还没有收藏任何文案，快去收藏吧！
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 更新公告弹窗 -->
+    <div class="update-modal" id="updateModal">
+        <div class="update-content">
+            <div class="update-header">
+                <div class="update-title">
+                    🚀 更新公告
+                    <span class="update-version">AI拍 1.0</span>
+                </div>
+                <button class="update-close" onclick="closeUpdateModal()">&times;</button>
+            </div>
+            
+            <div class="update-item">
+                <div class="update-date">📅 2026年2月22日 - 首次发布</div>
+                <ul class="update-features">
+                    <li>支持餐饮、美业、跨境电商等6大场景、4大创作风格</li>
+                    <li>3种方案一键生成，灵活选择</li>
+                    <li>AI自动生成场景专属语料库，无需手动上传</li>
+                    <li>历史记录、收藏功能，随时查看之前的文案</li>
+                    <li>用户昵称设置，数据永久保存在本地</li>
+                    <li>支持15秒、30秒、60秒三种视频时长</li>
+                    <li>一键复制功能，方便快捷</li>
+                    <li>精美卡片式设计，左右滑动切换方案</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = "/api/script/create";
+        // 用户信息（单机版用固定ID）
+        let USER_ID = "local_user_fixed_id_2026";
+        let userName = "";
+        
+        // 当前生成的文案信息
+        let currentScriptInfo = null;
+        
+        // 初始化用户信息
+        function initUser() {
+            const savedUserName = localStorage.getItem('ai_copywriter_user_name');
+            
+            if (savedUserName) {
+                userName = savedUserName;
+                document.getElementById('userNameDisplay').textContent = userName;
+            } else {
+                userName = "创作者";
+                document.getElementById('userNameDisplay').textContent = userName;
+            }
+        }
+        
+        // 显示昵称设置弹窗
+        function showNicknameModal() {
+            const modal = document.getElementById('nicknameModal');
+            const input = document.getElementById('nicknameInput');
+            input.value = userName;
+            modal.classList.add('show');
+            input.focus();
+        }
+        
+        // 保存昵称
+        function saveNickname() {
+            const input = document.getElementById('nicknameInput');
+            const newName = input.value.trim();
+            
+            if (!newName) {
+                alert('请输入昵称');
+                return;
+            }
+            
+            userName = newName;
+            localStorage.setItem('ai_copywriter_user_name', userName);
+            document.getElementById('userNameDisplay').textContent = userName;
+            document.getElementById('nicknameModal').classList.remove('show');
+        }
+        
+        // 保存原始文本（用于复制）
+        let originalScript = "";
+        // 保存所有方案
+        let allSchemes = [];
+        // 当前选中的方案索引
+        let currentSchemeIndex = 0;
+
+        // 初始化用户
+        initUser();
+
+        // 显示更新公告
+        function showUpdateModal() {
+            document.getElementById('updateModal').classList.add('show');
+        }
+
+        // 关闭更新公告
+        function closeUpdateModal() {
+            document.getElementById('updateModal').classList.remove('show');
+        }
+
+        // 每次打开都弹出更新公告
+        setTimeout(() => {
+            showUpdateModal();
+        }, 500);
+
+        // 当前收藏列表缓存
+        let currentFavorites = [];
+
+        // 获取收藏列表（从数据库）
+        async function loadFavorites() {
+            try {
+                const response = await fetch(`/api/favorites/list?user_id=${USER_ID}`);
+                const data = await response.json();
+                if (data.code === 200) {
+                    currentFavorites = data.data || [];
+                    return currentFavorites;
+                }
+                return [];
+            } catch (e) {
+                console.error(e);
+                return [];
+            }
+        }
+
+        // 检查是否已收藏
+        async function checkFavorite(schemeIndex) {
+            if (!currentScriptInfo) return false;
+            await loadFavorites();
+            const schemeName = `方案${schemeIndex + 1}`;
+            return currentFavorites.some(f => 
+                f.scene === currentScriptInfo.scene && 
+                f.scheme_name === schemeName &&
+                f.content === currentScriptInfo.schemes[schemeIndex]
+            );
+        }
+
+        // 切换收藏状态
+        async function toggleFavorite(schemeIndex) {
+            if (!currentScriptInfo) {
+                alert('请先生成文案！');
+                return;
+            }
+
+            const schemeName = `方案${schemeIndex + 1}`;
+            const content = currentScriptInfo.schemes[schemeIndex];
+            
+            await loadFavorites();
+            const existing = currentFavorites.find(f => 
+                f.scene === currentScriptInfo.scene && 
+                f.scheme_name === schemeName &&
+                f.content === content
+            );
+
+            if (existing) {
+                // 取消收藏
+                try {
+                    await fetch(`/api/favorites/${existing.id}?user_id=${USER_ID}`, {
+                        method: 'DELETE'
+                    });
+                    const btn = document.querySelector(`.scheme-card[data-index="${schemeIndex}"] .favorite-btn`);
+                    if (btn) {
+                        btn.classList.remove('active');
+                        btn.innerHTML = '🤍';
+                    }
+                    showToast('已取消收藏');
+                } catch (e) {
+                    console.error(e);
+                    showToast('取消收藏失败');
+                }
+            } else {
+                // 添加收藏
+                try {
+                    const params = new URLSearchParams({
+                        user_id: USER_ID,
+                        scene: currentScriptInfo.scene,
+                        style: currentScriptInfo.style,
+                        duration: currentScriptInfo.duration,
+                        key_info: currentScriptInfo.keyInfo,
+                        content: content,
+                        scheme_index: schemeIndex,
+                        scheme_name: schemeName
+                    });
+                    await fetch(`/api/favorites/add?${params}`, {
+                        method: 'POST'
+                    });
+                    const btn = document.querySelector(`.scheme-card[data-index="${schemeIndex}"] .favorite-btn`);
+                    if (btn) {
+                        btn.classList.add('active');
+                        btn.innerHTML = '❤️';
+                    }
+                    showToast('收藏成功！');
+                } catch (e) {
+                    console.error(e);
+                    showToast('收藏失败');
+                }
+            }
+        }
+
+        // 显示收藏列表
+        async function showFavorites() {
+            const modal = document.getElementById('favoritesModal');
+            const list = document.getElementById('favoritesList');
+            
+            list.innerHTML = '<div class="empty-favorites">加载中...</div>';
+            modal.classList.add('show');
+            
+            const favorites = await loadFavorites();
+
+            if (favorites.length === 0) {
+                list.innerHTML = '<div class="empty-favorites">还没有收藏任何文案，快去收藏吧！</div>';
+            } else {
+                list.innerHTML = favorites.map((fav, index) => `
+                    <div class="favorite-item" data-id="${fav.id}">
+                        <div class="favorite-item-header">
+                            <div class="favorite-item-scene">${fav.scene} - ${fav.scheme_name || '方案'}</div>
+                            <div class="favorite-item-time">${fav.create_time}</div>
+                        </div>
+                        <div class="favorite-item-info">
+                            时长：${fav.duration} | 风格：${fav.style}
+                        </div>
+                        <div class="favorite-item-actions">
+                            <button class="favorite-btn-view" onclick="viewFavorite(${index})">查看</button>
+                            <button class="favorite-btn-delete" onclick="deleteFavorite('${fav.id}')">删除</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // 关闭收藏弹窗
+        function closeFavorites() {
+            document.getElementById('favoritesModal').classList.remove('show');
+        }
+
+        // 查看收藏内容
+        async function viewFavorite(index) {
+            const favorites = await loadFavorites();
+            const fav = favorites[index];
+            if (fav) {
+                // 只显示收藏的那一个方案
+                allSchemes = [fav.content];
+                originalScript = fav.content;
+                currentSchemeIndex = 0;
+                
+                // 保存currentScriptInfo
+                currentScriptInfo = {
+                    scene: fav.scene,
+                    style: fav.style,
+                    duration: fav.duration,
+                    keyInfo: fav.key_info,
+                    schemes: allSchemes,
+                    time: fav.create_time
+                };
+                
+                renderSchemes();
+                closeFavorites();
+                
+                // 滚动到结果区域
+                document.querySelector('.result-card').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // 删除收藏
+        async function deleteFavorite(favoriteId) {
+            if (confirm('确定要删除这条收藏吗？')) {
+                try {
+                    await fetch(`/api/favorites/${favoriteId}?user_id=${USER_ID}`, {
+                        method: 'DELETE'
+                    });
+                    showFavorites();
+                    showToast('已删除');
+                } catch (e) {
+                    console.error(e);
+                    showToast('删除失败');
+                }
+            }
+        }
+
+        // 场景卡片选择器逻辑
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化用户信息
+            initUser();
+            
+            // 按Enter键保存昵称
+            const nicknameInput = document.getElementById('nicknameInput');
+            if (nicknameInput) {
+                nicknameInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        saveNickname();
+                    }
+                });
+            }
+            
+            const sceneCards = document.querySelectorAll('.scene-card');
+            const sceneInput = document.getElementById('scene');
+
+            // 默认选中第一个卡片
+            if (sceneCards.length > 0) {
+                sceneCards[0].classList.add('active');
+            }
+
+            sceneCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    // 移除所有卡片的active状态
+                    sceneCards.forEach(c => c.classList.remove('active'));
+                    // 给当前点击的卡片添加active状态
+                    this.classList.add('active');
+                    // 更新隐藏input的值
+                    sceneInput.value = this.getAttribute('data-value');
+                });
+            });
+        });
+
+        async function generateScript() {
+            const scene = document.getElementById("scene").value;
+            const style = document.getElementById("style").value;
+            const duration = document.getElementById("duration").value;
+            const keyInfo = document.getElementById("keyInfo").value.trim();
+            const schemesWrapper = document.getElementById("schemesWrapper");
+            const btn = document.querySelector(".generate-btn");
+
+            if (!keyInfo) {
+                alert("请填写核心卖点，信息越详细生成效果越好！");
+                return;
+            }
+
+            // 加载状态
+            btn.disabled = true;
+            btn.innerHTML = '<span>生成中...</span>';
+            schemesWrapper.innerHTML = `
+                <div class="scheme-card active">
+                    <div class="loading">
+                        <span>AI正在为你构思多种方案...</span>
+                        <div class="loading-dots">
+                            <div class="loading-dot"></div>
+                            <div class="loading-dot"></div>
+                            <div class="loading-dot"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById("schemeDots").innerHTML = "";
+            document.getElementById("prevBtn").disabled = true;
+            document.getElementById("nextBtn").disabled = true;
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({
+                        user_id: USER_ID,
+                        scene: scene,
+                        style: style,
+                        duration: duration,
+                        key_info: keyInfo
+                    })
+                });
+
+                const data = await response.json();
+                if (data.code === 200) {
+                    allSchemes = data.data.schemes || [data.data.content];
+                    originalScript = allSchemes[0];
+                    currentSchemeIndex = 0;
+                    
+                    // 保存当前生成的文案信息
+                    currentScriptInfo = {
+                        scene: scene,
+                        style: style,
+                        duration: duration,
+                        keyInfo: keyInfo,
+                        schemes: allSchemes,
+                        time: new Date().toLocaleString('zh-CN')
+                    };
+                    
+                    renderSchemes();
+                } else {
+                    allSchemes = [];
+                    originalScript = "";
+                    currentScriptInfo = null;
+                    schemesWrapper.innerHTML = `
+                        <div class="scheme-card active">
+                            <div class="result-content">生成失败：${data.msg || "服务器繁忙，请稍后再试"}</div>
+                        </div>
+                    `;
+                }
+            } catch (e) {
+                allSchemes = [];
+                originalScript = "";
+                schemesWrapper.innerHTML = `
+                    <div class="scheme-card active">
+                        <div class="result-content">请求失败：请检查后端服务是否正常运行</div>
+                    </div>
+                `;
+                console.error(e);
+            } finally {
+                // 恢复状态
+                btn.disabled = false;
+                btn.innerHTML = '<span>生成文案</span>';
+            }
+        }
+
+        // 渲染所有方案
+        async function renderSchemes() {
+            const schemesWrapper = document.getElementById("schemesWrapper");
+            const schemeDots = document.getElementById("schemeDots");
+
+            schemesWrapper.innerHTML = "";
+            schemeDots.innerHTML = "";
+
+            // 先加载收藏状态
+            const favorites = await loadFavorites();
+
+            allSchemes.forEach((scheme, index) => {
+                const schemeName = `方案${index + 1}`;
+                const isFavorited = currentScriptInfo && favorites.some(f => 
+                    f.scene === currentScriptInfo.scene && 
+                    f.scheme_name === schemeName &&
+                    f.content === scheme
+                );
+                
+                // 创建方案卡片
+                const card = document.createElement("div");
+                card.className = "scheme-card" + (index === currentSchemeIndex ? " active" : " inactive");
+                card.dataset.index = index;
+                
+                // 如果只有一个方案（收藏的），标签显示"已收藏"
+                const labelText = allSchemes.length === 1 ? "已收藏" : `方案 ${index + 1}`;
+                
+                card.innerHTML = `
+                    <button class="favorite-btn ${isFavorited ? 'active' : ''}" onclick="toggleFavorite(${index})">
+                        ${isFavorited ? '❤️' : '🤍'}
+                    </button>
+                    <div class="scheme-label">${labelText}</div>
+                    <div class="result-content">${formatScript(scheme)}</div>
+                `;
+                schemesWrapper.appendChild(card);
+
+                // 创建方案指示点（只有一个方案时不显示）
+                if (allSchemes.length > 1) {
+                    const dot = document.createElement("div");
+                    dot.className = "scheme-dot" + (index === currentSchemeIndex ? " active" : "");
+                    dot.dataset.index = index;
+                    dot.onclick = () => goToScheme(index);
+                    schemeDots.appendChild(dot);
+                }
+            });
+
+            // 等待DOM渲染后更新
+            setTimeout(() => {
+                updateSchemeDisplay();
+            }, 50);
+        }
+
+        // 切换到上一个方案
+        function prevScheme() {
+            if (currentSchemeIndex > 0) {
+                currentSchemeIndex--;
+                updateSchemeDisplay();
+            }
+        }
+
+        // 切换到下一个方案
+        function nextScheme() {
+            if (currentSchemeIndex < allSchemes.length - 1) {
+                currentSchemeIndex++;
+                updateSchemeDisplay();
+            }
+        }
+
+        // 跳转到指定方案
+        function goToScheme(index) {
+            currentSchemeIndex = index;
+            updateSchemeDisplay();
+        }
+
+        // 更新方案显示 - 核心修复：动态计算居中位移
+        function updateSchemeDisplay() {
+            const cards = document.querySelectorAll(".scheme-card");
+            const dots = document.querySelectorAll(".scheme-dot");
+            const prevBtn = document.getElementById("prevBtn");
+            const nextBtn = document.getElementById("nextBtn");
+            const schemesWrapper = document.getElementById("schemesWrapper");
+            const container = document.querySelector(".schemes-container");
+
+            // 更新当前选中的方案文本
+            originalScript = allSchemes[currentSchemeIndex];
+
+            // 更新卡片样式
+            cards.forEach((card, index) => {
+                card.classList.remove("active", "inactive");
+                if (index === currentSchemeIndex) {
+                    card.classList.add("active");
+                } else {
+                    card.classList.add("inactive");
+                }
+            });
+
+            // 更新指示点
+            dots.forEach((dot, index) => {
+                dot.classList.remove("active");
+                if (index === currentSchemeIndex) {
+                    dot.classList.add("active");
+                }
+            });
+
+            // 核心修复：动态计算位移，确保当前卡片居中
+            if (cards.length > 0) {
+                // 获取容器和卡片的实际尺寸
+                const containerWidth = container.offsetWidth;
+                const cardWidth = cards[0].offsetWidth;
+                // 计算单个卡片的偏移量（容器中心 - 卡片中心）
+                const baseOffset = (containerWidth - cardWidth) / 2;
+                // 计算整体滑动位移：-当前索引*卡片宽度 + 基础偏移（抵消卡片左侧空白）
+                const offsetX = - (currentSchemeIndex * (cardWidth + 20)) + baseOffset;
+                
+                schemesWrapper.style.transform = `translateX(${offsetX}px)`;
+            }
+
+            // 更新导航按钮状态
+            prevBtn.disabled = currentSchemeIndex === 0;
+            nextBtn.disabled = currentSchemeIndex === allSchemes.length - 1;
+        }
+
+        // 核心：格式化脚本，精准解析镜头/台词/配乐，兜底空值
+        function formatScript(scriptText) {
+            // 1. 提取标题
+            const titleMatch = scriptText.match(/标题[:：]\s*(.+)/);
+            const title = titleMatch ? titleMatch[1].trim() : "无标题";
+            const rest = scriptText.replace(/标题[:：]\s*.+/, "").trim();
+
+            // 2. 提取统一配乐建议
+            const musicMatch = rest.match(/配乐建议[:：]\s*(.+)/);
+            const music = musicMatch ? musicMatch[1].trim() : "";
+            const shotsContent = rest.replace(/配乐建议[:：]\s*.+/, "").trim();
+
+            // 3. 按镜头分组（匹配镜头1、镜头2...）
+            const shotRegex = /镜头(\d+)[:：]\s*(.+?)(?=镜头\d+[:：]|$)/gs;
+            const matches = [...shotsContent.matchAll(shotRegex)];
+
+            let html = `<div class="script-title">【视频标题】${title}</div>`;
+
+            // 显示统一配乐建议
+            if (music) {
+                html += `
+                    <div class="music-suggestion">
+                        <span class="music-suggestion-label">🎵 配乐建议：</span>${music}
+                    </div>
+                `;
+            }
+
+            if (matches.length === 0) {
+                html += `<div>${shotsContent}</div>`;
+                return html;
+            }
+
+            matches.forEach(match => {
+                const num = match[1];
+                let content = match[2].trim();
+
+                // 兜底：如果一行里同时出现镜头和台词，尝试拆分
+                let camera = "";
+                let dialogue = "";
+
+                // 先尝试匹配标准格式
+                const dialogueMatch = content.match(/台词(\d+)[:：]\s*(.+)/);
+
+                if (dialogueMatch) {
+                    // 标准格式：镜头、台词分离
+                    camera = content.replace(/台词\d+[:：].+/, "").trim();
+                    dialogue = dialogueMatch[2].trim();
+                } else {
+                    // 兜底格式：尝试从一行里拆分
+                    const dialoguePart = content.split(/台词\d+[:：]/);
+                    if (dialoguePart.length > 1) {
+                        dialogue = dialoguePart[1].trim();
+                        camera = dialoguePart[0].trim();
+                    } else {
+                        // 如果还是没找到台词，就把整行当作镜头
+                        camera = content;
+                        dialogue = '<span class="empty-hint">（台词待补充，可根据镜头自由发挥）</span>';
+                    }
+                }
+
+                camera = camera || '<span class="empty-hint">（镜头描述待补充）</span>';
+
+                html += `
+                    <div class="shot-item">
+                        <div class="shot-num">镜头 ${num}</div>
+                        <div class="shot-camera"><span class="shot-label">镜头：</span>${camera}</div>
+                        <div class="shot-dialogue"><span class="shot-label">台词：</span>${dialogue}</div>
+                    </div>
+                `;
+            });
+
+            return html;
+        }
+
+        function copyResult() {
+            const toast = document.getElementById("toast");
+
+            if (!originalScript || originalScript.includes("点击上方") || originalScript.includes("生成失败")) {
+                alert("暂无可用文案可复制");
+                return;
+            }
+
+            // 复制原始纯文本（不带样式）
+            navigator.clipboard.writeText(originalScript).then(() => {
+                showToast("复制成功！");
+            }).catch(() => {
+                alert("复制失败，请手动选中复制");
+            });
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById("toast");
+            toast.textContent = message;
+            toast.classList.add("show");
+            setTimeout(() => toast.classList.remove("show"), 2000);
+        }
+        
+        // 显示历史记录
+        async function showHistory() {
+            const modal = document.getElementById("historyModal");
+            const historyList = document.getElementById("historyList");
+
+            modal.classList.add("show");
+
+            try {
+                const response = await fetch(`/api/scripts/history?user_id=${USER_ID}`);
+                const data = await response.json();
+                if (data.code === 200 && data.data && data.data.length > 0) {
+                    historyList.innerHTML = data.data.map((item, index) => `
+                        <div class="history-item" data-index="${index}">
+                            <div class="history-header">
+                                <span class="history-scene">${item.scene}</span>
+                                <span class="history-time">${item.create_time}</span>
+                            </div>
+                            <div class="history-info">
+                                ${item.key_info.length > 50 ? item.key_info.substring(0, 50) + '...' : item.key_info}
+                            </div>
+                            <div class="history-actions">
+                                <button class="history-btn history-btn-view" data-index="${index}">查看</button>
+                                <button class="history-btn history-btn-delete" onclick="deleteHistory('${item.id}')">删除</button>
+                            </div>
+                        </div>
+                    `).join('');
+                    
+                    setTimeout(() => {
+                        const viewBtns = historyList.querySelectorAll('.history-btn-view');
+                        viewBtns.forEach((btn, idx) => {
+                            btn.addEventListener('click', () => {
+                                viewHistory(data.data[idx]);
+                            });
+                        });
+                    }, 10);
+                } else {
+                    historyList.innerHTML = `<div class="empty-history">暂无历史记录</div>`;
+                }
+            } catch (e) {
+                historyList.innerHTML = `<div class="empty-history">获取历史记录失败</div>`;
+                console.error(e);
+            }
+        }
+
+        // 查看历史记录
+        function viewHistory(item) {
+            closeHistory();
+            
+            // 获取所有方案
+            allSchemes = item.schemes || [item.content];
+            originalScript = allSchemes[0];
+            currentSchemeIndex = 0;
+            
+            // 保存到currentScriptInfo以便收藏功能正常工作
+            currentScriptInfo = {
+                scene: item.scene,
+                style: item.style,
+                duration: item.duration,
+                keyInfo: item.key_info,
+                schemes: allSchemes,
+                time: item.create_time
+            };
+            
+            renderSchemes();
+        }
+
+        // 删除历史记录
+        async function deleteHistory(scriptId) {
+            if (!confirm('确定要删除这条记录吗？')) return;
+            try {
+                const response = await fetch(`/api/scripts/${scriptId}?user_id=${USER_ID}`, {
+                    method: 'DELETE'
+                });
+                const data = await response.json();
+                if (data.code === 200) {
+                    showHistory();
+                } else {
+                    alert('删除失败');
+                }
+            } catch (e) {
+                alert('删除失败');
+                console.error(e);
+            }
+        }
+
+        // 关闭历史记录（补充缺失的函数）
+        function closeHistory() {
+            const modal = document.getElementById("historyModal");
+            modal.classList.remove("show");
+        }
+
+        // 窗口大小变化时重新计算居中（适配响应式）
+        window.addEventListener('resize', updateSchemeDisplay);
+    </script>
+</body>
+</html>
