@@ -39,8 +39,8 @@ pip install -r requirements.txt
 ```
 
 3. **配置 API Key**
-# 编辑 .env，填入你的 DeepSeek API Key
-
+编辑 .env，填入你的 DeepSeek API Key
+```
 
 4. **运行应用**
 ```bash
