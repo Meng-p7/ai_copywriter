@@ -3,67 +3,319 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI拍</title>
+    <title>AI拍 - 智能文案创作</title>
     <style>
         :root {
-            --primary: #FF8C38; /* 暖橙主色 */
-            --primary-light: #FFE0C0; /* 浅橙背景 */
-            --primary-dark: #E67320; /* 深橙hover */
-            --text-main: #333333; /* 主文本 */
-            --text-secondary: #666666; /* 次文本 */
-            --text-hint: #999999; /* 提示文本 */
-            --border: #F0D0B0; /* 边框色 */
-            --success: #52C41A; /* 成功色 */
-            --camera: #4096ff; /* 镜头色 浅蓝 */
-            --dialogue: #722ed1; /* 台词色 紫 */
-            --music: #fa8c16; /* 音乐色 橙黄 */
-            --radius: 12px; /* 统一圆角 */
-            --shadow: 0 4px 12px rgba(255, 140, 56, 0.15); /* 暖色调阴影 */
+            --primary: #1E40AF; /* 深蓝色主色 */
+            --primary-light: #EFF6FF; /* 浅蓝背景 */
+            --primary-dark: #1E3A8A; /* 深蓝hover */
+            --secondary: #F9FAFB; /* 浅灰背景 */
+            --accent: #3B82F6; /* 亮蓝色辅助 */
+            --text-main: #1F2937; /* 主文本 */
+            --text-secondary: #4B5563; /* 次文本 */
+            --text-hint: #9CA3AF; /* 提示文本 */
+            --border: #E5E7EB; /* 边框色 */
+            --success: #10B981; /* 成功色 */
+            --camera: #6366F1; /* 镜头色 */
+            --dialogue: #8B5CF6; /* 台词色 */
+            --music: #F59E0B; /* 音乐色 */
+            --radius: 16px; /* 统一圆角 */
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* 现代化阴影 */
+            --shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* 悬停阴影 */
+            --bg-gradient: linear-gradient(135deg, #FFFFFF 0%, #F9FAFB 100%); /* 现代背景 */
+            --primary-gradient: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%); /* 主色渐变 */
+            --glass-bg: rgba(255, 255, 255, 0.8); /* 玻璃拟态背景 */
+            --glass-border: rgba(255, 255, 255, 0.6); /* 玻璃拟态边框 */
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+            font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
         }
 
         body {
-            background-color: #FFF9F5; /* 暖白底色 */
-            max-width: 800px;
+            background: var(--bg-gradient);
+            margin: 0;
+            padding: 0;
+            color: var(--text-main);
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* 背景装饰元素 */
+        .bg-decoration {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .circle {
+            position: absolute;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(30, 64, 175, 0.04));
+            animation: float 20s ease-in-out infinite;
+        }
+
+        .circle-1 {
+            width: 400px;
+            height: 400px;
+            top: -100px;
+            right: -100px;
+            animation-delay: 0s;
+        }
+
+        .circle-2 {
+            width: 300px;
+            height: 300px;
+            bottom: -50px;
+            left: -50px;
+            animation-delay: -5s;
+        }
+
+        .circle-3 {
+            width: 200px;
+            height: 200px;
+            top: 40%;
+            right: 10%;
+            animation-delay: -10s;
+        }
+
+        .circle-4 {
+            width: 150px;
+            height: 150px;
+            top: 20%;
+            left: 5%;
+            animation-delay: -15s;
+        }
+
+        .circle-5 {
+            width: 250px;
+            height: 250px;
+            bottom: 20%;
+            right: 20%;
+            animation-delay: -8s;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg);
+            }
+            25% {
+                transform: translateY(-20px) rotate(5deg);
+            }
+            50% {
+                transform: translateY(-40px) rotate(0deg);
+            }
+            75% {
+                transform: translateY(-20px) rotate(-5deg);
+            }
+        }
+
+        .container {
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 30px 20px;
+            padding: 40px 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* 顶部导航 */
+        .nav-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 60px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--primary-gradient);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .logo-text {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            align-items: center;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-weight: 500;
+            transition: color 0.3s ease;
+            font-size: 16px;
+        }
+
+        .nav-link:hover {
+            color: var(--primary);
+        }
+
+        .nav-link.active {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .user-section {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .user-name {
+            font-weight: 500;
             color: var(--text-main);
         }
 
-        .app-header {
-            text-align: center;
-            margin-bottom: 30px;
+        .btn-edit {
+            background: none;
+            border: 1px solid var(--border);
+            padding: 8px 16px;
+            border-radius: 8px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
         }
 
-        .app-title {
-            font-size: 28px;
+        .btn-edit:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* 英雄区域 */
+        .hero-section {
+            text-align: center;
+            margin-bottom: 60px;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .hero-title {
+            font-size: 48px;
             font-weight: 700;
+            margin-bottom: 16px;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: 20px;
+            color: var(--text-secondary);
+            margin-bottom: 40px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin-bottom: 40px;
+        }
+
+        .btn-primary {
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--primary);
+            border: 1px solid var(--border);
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow);
+        }
+
+        /* 主要内容区域 */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+
+        /* 左侧表单 */
+        .form-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: var(--radius);
+            padding: 32px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--glass-border);
+        }
+
+        .form-header {
+            margin-bottom: 24px;
+        }
+
+        .form-title {
+            font-size: 24px;
+            font-weight: 600;
             color: var(--primary);
             margin-bottom: 8px;
         }
 
-        .app-subtitle {
-            font-size: 16px;
+        .form-subtitle {
             color: var(--text-secondary);
-        }
-
-        .card {
-            background: white;
-            border-radius: var(--radius);
-            padding: 24px;
-            box-shadow: var(--shadow);
-            margin-bottom: 20px;
-            border: 1px solid var(--border);
+            font-size: 14px;
         }
 
         .form-item {
-            margin-bottom: 20px;
+            margin-bottom: 24px;
         }
 
         .label {
@@ -71,31 +323,24 @@
             font-weight: 600;
             margin-bottom: 8px;
             color: var(--text-main);
-            font-size: 15px;
-        }
-
-        .hint {
-            font-size: 12px;
-            color: var(--text-hint);
-            margin-top: 4px;
-            display: block;
+            font-size: 14px;
         }
 
         select, textarea, input {
             width: 100%;
-            padding: 12px 15px;
+            padding: 12px 16px;
             border: 1px solid var(--border);
-            border-radius: var(--radius);
+            border-radius: 8px;
             font-size: 16px;
             color: var(--text-main);
             background-color: white;
-            transition: border 0.3s ease;
+            transition: all 0.3s ease;
         }
 
         select:focus, textarea:focus, input:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(255, 140, 56, 0.2);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
 
         textarea {
@@ -104,51 +349,38 @@
             line-height: 1.6;
         }
 
-        /* 场景卡片选择器样式 */
+        /* 场景选择器 */
         .scene-selector {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(3, 1fr);
             gap: 12px;
-            margin-bottom: 20px;
+            margin-bottom: 24px;
         }
 
         .scene-card {
-            padding: 16px 20px;
-            background-color: white;
+            padding: 20px;
+            background: white;
             border: 2px solid var(--border);
-            border-radius: var(--radius);
+            border-radius: 12px;
             cursor: pointer;
             transition: all 0.3s ease;
             text-align: center;
             font-size: 14px;
             color: var(--text-main);
             position: relative;
-            overflow: hidden;
         }
 
         .scene-card:hover {
             border-color: var(--primary);
-            background-color: var(--primary-light);
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(255, 140, 56, 0.2);
+            box-shadow: var(--shadow);
         }
 
         .scene-card.active {
             border-color: var(--primary);
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            color: white;
+            background: var(--primary-light);
+            color: var(--primary);
             font-weight: 600;
-            box-shadow: 0 6px 16px rgba(255, 140, 56, 0.35);
-            transform: scale(1.02);
-        }
-
-        .scene-card.active::after {
-            content: "✓";
-            position: absolute;
-            top: 4px;
-            right: 8px;
-            font-size: 12px;
-            font-weight: bold;
         }
 
         .scene-icon {
@@ -159,8 +391,8 @@
 
         .form-row {
             display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
+            gap: 16px;
+            margin-bottom: 24px;
         }
 
         .form-row .form-item {
@@ -168,17 +400,19 @@
             margin-bottom: 0;
         }
 
+        /* 生成按钮 */
         .generate-btn {
             width: 100%;
-            padding: 14px;
-            background-color: var(--primary);
+            padding: 16px;
+            background: var(--primary-gradient);
             color: white;
             border: none;
-            border-radius: var(--radius);
-            font-size: 18px;
+            border-radius: 12px;
+            font-size: 16px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
+            box-shadow: var(--shadow);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -186,212 +420,274 @@
         }
 
         .generate-btn:hover {
-            background-color: var(--primary-dark);
             transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(255, 140, 56, 0.25);
+            box-shadow: var(--shadow-hover);
         }
 
         .generate-btn:disabled {
-            background-color: var(--primary-light);
+            background: var(--border);
+            color: var(--text-hint);
             cursor: not-allowed;
             transform: none;
             box-shadow: none;
         }
 
-        .btn-group {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-            justify-content: center;
-        }
-
-        .btn-history {
-            width: 100%;
-            padding: 12px;
-            background: linear-gradient(135deg, #6f42c1, #5a32a3);
-            color: white;
-            border: none;
+        /* 右侧结果区域 */
+        .result-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border-radius: var(--radius);
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-        }
-
-        .btn-history:hover {
-            background: linear-gradient(135deg, #5a32a3, #4a278a);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(111, 66, 193, 0.3);
-        }
-
-        .result-card {
-            position: relative;
-            min-height: 300px;
+            padding: 32px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--glass-border);
+            min-height: 600px;
         }
 
         .result-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
-            padding-bottom: 12px;
-            border-bottom: 1px dashed var(--border);
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
         }
 
         .result-title {
+            font-size: 20px;
             font-weight: 600;
             color: var(--primary);
         }
 
-        .copy-btn {
-            background: none;
-            border: none;
-            color: var(--primary);
+        .result-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .action-btn {
+            background: white;
+            border: 1px solid var(--border);
+            padding: 8px 16px;
+            border-radius: 8px;
+            color: var(--text-secondary);
             cursor: pointer;
+            transition: all 0.3s ease;
             font-size: 14px;
+        }
+
+        .action-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* 方案显示容器 */
+        .scheme-container {
+            min-height: 400px;
+            margin-bottom: 24px;
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .scheme-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .scheme-label {
+            background: var(--primary-light);
+            color: var(--primary);
+            padding: 6px 16px;
+            border-radius: 16px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .favorite-btn {
+            background: none;
+            border: 1px solid var(--border);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 4px;
-            transition: color 0.3s ease;
-        }
-
-        .copy-btn:hover {
-            color: var(--primary-dark);
-        }
-
-        /* 脚本样式核心优化 */
-        .result-content {
+            justify-content: center;
             font-size: 16px;
-            line-height: 1.8;
+            transition: all 0.3s ease;
+        }
+
+        .favorite-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .favorite-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .script-content {
+            line-height: 1.6;
             color: var(--text-main);
-            height: calc(100% - 40px);
-            overflow-y: auto;
-            padding-right: 10px;
         }
 
         .script-title {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 600;
-            margin-bottom: 20px;
-            color: var(--primary);
-            padding-bottom: 10px;
-            border-bottom: 2px solid var(--primary-light);
-        }
-
-        .music-suggestion {
-            background-color: #FFF5EB;
-            border-left: 4px solid var(--music);
-            padding: 12px 15px;
-            margin-bottom: 20px;
-            border-radius: 8px;
-            color: var(--music);
-        }
-
-        .music-suggestion-label {
-            font-weight: 600;
-            margin-right: 8px;
+            margin-bottom: 16px;
+            color: var(--text-main);
         }
 
         .shot-item {
-            margin-bottom: 20px;
-            padding: 15px;
-            background-color: #FFF5EB;
+            margin-bottom: 16px;
+            padding: 12px;
+            background: var(--secondary);
             border-radius: 8px;
             border-left: 4px solid var(--camera);
         }
 
-        .shot-num {
+        .shot-header {
             font-weight: 600;
             color: var(--camera);
             margin-bottom: 8px;
-            font-size: 18px;
-        }
-
-        .shot-label {
-            font-weight: 600;
-            display: inline-block;
-            width: 60px;
         }
 
         .shot-camera {
-            color: var(--camera);
-            margin-bottom: 5px;
+            margin-bottom: 4px;
+            font-size: 14px;
         }
 
         .shot-dialogue {
+            margin-bottom: 4px;
+            font-size: 14px;
             color: var(--dialogue);
-            margin-bottom: 5px;
         }
 
-        .shot-music {
-            color: var(--music);
-            background-color: rgba(250, 140, 22, 0.1);
-            padding: 2px 6px;
-            border-radius: 4px;
-        }
 
-        .empty-hint {
-            color: var(--text-hint);
-            font-style: italic;
-        }
 
+        /* 加载状态 */
         .loading {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 160px;
+            height: 400px;
             color: var(--text-hint);
+        }
+
+        .loading-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        .loading-text {
+            font-size: 16px;
+            margin-bottom: 8px;
         }
 
         .loading-dots {
             display: flex;
             gap: 4px;
-            margin-top: 12px;
         }
 
         .loading-dot {
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background-color: var(--primary-light);
+            background: var(--primary);
             animation: bounce 1.4s infinite ease-in-out both;
         }
 
         .loading-dot:nth-child(1) { animation-delay: -0.32s; }
         .loading-dot:nth-child(2) { animation-delay: -0.16s; }
 
+        /* 动画效果 */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 0.8;
+            }
+        }
+
         @keyframes bounce {
-            0%, 80%, 100% { transform: scale(0); }
-            40% { transform: scale(1); }
+            0%, 80%, 100% {
+                transform: scale(0);
+            }
+            40% {
+                transform: scale(1);
+            }
         }
 
-        .success-toast {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: var(--success);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-size: 14px;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            pointer-events: none;
-            z-index: 999;
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            .nav-header {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+
+            .nav-links {
+                gap: 16px;
+            }
+
+            .hero-title {
+                font-size: 32px;
+            }
+
+            .hero-subtitle {
+                font-size: 16px;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+
+            .scene-selector {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                flex-direction: column;
+                gap: 24px;
+            }
         }
 
-        .success-toast.show {
-            opacity: 1;
-        }
-
-        /* 历史记录弹窗样式 */
-        .modal-overlay {
+        /* 模态框 */
+        .modal {
             position: fixed;
             top: 0;
             left: 0;
@@ -404,27 +700,24 @@
             z-index: 1000;
         }
 
-        .modal-overlay.show {
+        .modal.show {
             display: flex;
         }
 
         .modal-content {
             background: white;
-            border-radius: var(--radius);
+            border-radius: 12px;
+            padding: 32px;
             width: 90%;
-            max-width: 700px;
-            max-height: 80vh;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+            max-width: 500px;
+            box-shadow: var(--shadow-hover);
         }
 
         .modal-header {
-            padding: 20px;
-            border-bottom: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 24px;
         }
 
         .modal-title {
@@ -436,1699 +729,707 @@
         .modal-close {
             background: none;
             border: none;
-            font-size: 28px;
+            font-size: 24px;
             color: var(--text-hint);
             cursor: pointer;
-            transition: color 0.3s ease;
-            line-height: 1;
-        }
-
-        .modal-close:hover {
-            color: var(--text-main);
         }
 
         .modal-body {
-            padding: 20px;
-            overflow-y: auto;
-            flex: 1;
+            margin-bottom: 24px;
         }
 
-        .history-item {
-            background-color: #FFF9F5;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 16px;
-            margin-bottom: 12px;
-            transition: all 0.3s ease;
-        }
-
-        .history-item:hover {
-            box-shadow: 0 4px 12px rgba(255, 140, 56, 0.15);
-            transform: translateY(-2px);
-        }
-
-        .history-header {
+        .modal-footer {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
+            gap: 12px;
+            justify-content: flex-end;
         }
 
-        .history-scene {
-            font-weight: 600;
-            color: var(--primary);
-            font-size: 16px;
-        }
-
-        .history-time {
-            font-size: 12px;
-            color: var(--text-hint);
-        }
-
-        .history-info {
-            font-size: 14px;
-            color: var(--text-secondary);
-            margin-bottom: 8px;
-        }
-
-        .history-actions {
-            display: flex;
-            gap: 8px;
-        }
-
-        .history-btn {
-            padding: 6px 12px;
-            border: none;
-            border-radius: 6px;
-            font-size: 13px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .history-btn-view {
-            background-color: var(--primary);
-            color: white;
-        }
-
-        .history-btn-view:hover {
-            background-color: var(--primary-dark);
-        }
-
-        .history-btn-delete {
-            background-color: #ff4d4f;
-            color: white;
-        }
-
-        .history-btn-delete:hover {
-            background-color: #d9363e;
-        }
-
-        .empty-history {
-            text-align: center;
-            color: var(--text-hint);
-            padding: 40px 20px;
-        }
-
-        /* 多方案卡片滑动样式 - 核心修复：动态居中 + 自适应 */
-        .schemes-container {
-            position: relative;
-            overflow: hidden;
-            padding: 20px 0;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .schemes-wrapper {
-            display: flex;
-            align-items: center;
-            transition: transform 0.4s ease;
-            padding: 10px 0;
-            min-height: 420px;
-            position: relative;
-            width: 100%;
-            /* 关键：初始位置重置 */
-            left: 0;
-            transform: translateX(0);
-        }
-
-        .scheme-card {
-            flex-shrink: 0;
-            /* 关键：改为相对宽度，适配不同屏幕 */
-            width: calc(100% - 40px);
-            max-width: 600px;
-            min-height: 400px;
-            background: white;
-            border-radius: var(--radius);
-            padding: 40px 24px 24px 24px;
-            box-shadow: var(--shadow);
-            border: 2px solid var(--border);
-            transition: all 0.4s ease;
-            /* 关键：移除固定margin，改为动态间距 */
-            margin: 0 10px;
-            position: relative;
-            overflow-y: visible;
-        }
-
-        .scheme-card.active {
-            border-color: var(--primary);
-            box-shadow: 0 8px 24px rgba(255, 140, 56, 0.3);
-            transform: scale(1);
-            z-index: 10;
-            opacity: 1;
-            filter: blur(0);
-        }
-
-        .scheme-card.inactive {
-            opacity: 0.45;
-            filter: blur(3px);
-            transform: scale(0.88);
-            z-index: 1;
-        }
-
-        .scheme-card.hidden {
-            display: none;
-        }
-
-        .scheme-label {
-            position: absolute;
-            top: -15px;
+        /* 提示消息 */
+        .toast {
+            position: fixed;
+            bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            background: linear-gradient(135deg, var(--camera) 0%, #1890ff 100%);
+            background: var(--success);
             color: white;
-            padding: 8px 24px;
-            border-radius: 20px;
-            font-size: 20px;
-            font-weight: 700;
-            z-index: 11;
-            box-shadow: 0 4px 12px rgba(64, 150, 255, 0.35);
-        }
-
-        .scheme-nav {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 48px;
-            height: 48px;
-            background: linear-gradient(135deg, #ffffff 0%, #fff9f5 100%);
-            border: none;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 20;
-            font-size: 24px;
-            color: var(--primary);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .scheme-nav.prev {
-            left: 10px;
-        }
-
-        .scheme-nav.next {
-            right: 10px;
-        }
-
-        .scheme-nav:hover {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            color: white;
-            transform: translateY(-50%) scale(1.1);
-            box-shadow: 0 6px 20px rgba(255, 140, 56, 0.4);
-        }
-
-        .scheme-nav:disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-            transform: translateY(-50%) scale(1);
-        }
-
-        .scheme-nav:active {
-            transform: translateY(-50%) scale(0.95);
-        }
-
-        .scheme-dots {
-            display: flex;
-            justify-content: center;
-            gap: 12px;
-            margin-top: 20px;
-        }
-
-        .scheme-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: var(--border);
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .scheme-dot.active {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            transform: scale(1.4);
-            box-shadow: 0 4px 12px rgba(255, 140, 56, 0.4);
-        }
-
-        .scheme-dot:hover {
-            background: var(--primary-dark);
-            transform: scale(1.2);
-        }
-
-        /* 收藏按钮样式 */
-        .favorite-btn {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: white;
-            border: none;
-            border-radius: 50%;
-            width: 44px;
-            height: 44px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-            z-index: 12;
-        }
-
-        .favorite-btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        }
-
-        .favorite-btn.active {
-            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a5a 100%);
-            color: white;
-        }
-
-        /* 我的收藏按钮样式 */
-        .btn-favorites {
-            width: 100%;
-            padding: 12px;
-            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a5a 100%);
-            color: white;
-            border: none;
-            border-radius: var(--radius);
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-        }
-
-        .btn-favorites:hover {
-            background: linear-gradient(135deg, #ee5a5a 0%, #d94444 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(238, 90, 90, 0.3);
-        }
-
-        /* 收藏弹窗样式 */
-        .favorites-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 2500;
-        }
-
-        .favorites-modal.show {
-            display: flex;
-        }
-
-        .favorites-content {
-            background: white;
-            border-radius: var(--radius);
-            padding: 30px;
-            width: 90%;
-            max-width: 600px;
-            max-height: 80vh;
-            overflow-y: auto;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-        }
-
-        .favorites-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .favorites-title {
-            font-size: 22px;
-            font-weight: 700;
-            color: #ff6b6b;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .favorite-item {
-            background-color: #FFF9F5;
-            border: 1px solid var(--border);
+            padding: 12px 24px;
             border-radius: 8px;
-            padding: 16px;
-            margin-bottom: 12px;
-            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1000;
         }
 
-        .favorite-item:hover {
-            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.15);
-            transform: translateY(-2px);
-        }
-
-        .favorite-item-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .favorite-item-scene {
-            font-weight: 600;
-            color: var(--primary);
-            font-size: 14px;
-        }
-
-        .favorite-item-time {
-            font-size: 12px;
-            color: var(--text-hint);
-        }
-
-        .favorite-item-info {
-            font-size: 13px;
-            color: var(--text-secondary);
-            margin-bottom: 10px;
-        }
-
-        .favorite-item-actions {
-            display: flex;
-            gap: 8px;
-        }
-
-        .favorite-btn-view {
-            padding: 6px 12px;
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 13px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .favorite-btn-view:hover {
-            background-color: var(--primary-dark);
-        }
-
-        .favorite-btn-delete {
-            padding: 6px 12px;
-            background-color: #ff6b6b;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 13px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .favorite-btn-delete:hover {
-            background-color: #ee5a5a;
-        }
-
-        .empty-favorites {
-            text-align: center;
-            color: var(--text-hint);
-            padding: 40px 20px;
-        }
-
-        /* 新版本提示弹窗样式 */
-        #newVersionModal .update-content {
-            max-width: 450px;
-        }
-
-        .new-version-info {
-            text-align: center;
-            padding: 20px 0;
-        }
-
-        .new-version-info p {
-            margin: 10px 0;
-            font-size: 16px;
-        }
-
-        .new-version-info strong {
-            color: var(--text-secondary);
-        }
-
-        .new-version-info span {
-            color: var(--primary);
-            font-weight: 700;
-        }
-
-        .update-buttons {
-            display: flex;
-            gap: 12px;
-            margin-top: 20px;
-        }
-
-        .btn-primary, .btn-secondary {
-            flex: 1;
-            padding: 12px 20px;
-            border: none;
-            border-radius: var(--radius);
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary) 0%, #ff8e53 100%);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(255, 107, 107, 0.3);
-        }
-
-        .btn-secondary {
-            background-color: var(--bg-light);
-            color: var(--text-secondary);
-        }
-
-        .btn-secondary:hover {
-            background-color: var(--border);
-        }
-
-        /* 用户信息样式 */
-        .user-info {
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            margin-bottom: 15px;
-            gap: 10px;
-        }
-
-        .user-name {
-            font-size: 14px;
-            color: var(--text-secondary);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .user-name span {
-            font-weight: 600;
-            color: var(--primary);
-        }
-
-        .btn-edit-name {
-            background: none;
-            border: none;
-            color: var(--text-hint);
-            cursor: pointer;
-            font-size: 12px;
-            padding: 4px 8px;
-            border-radius: 4px;
-            transition: all 0.3s ease;
-        }
-
-        .btn-edit-name:hover {
-            background-color: var(--primary-light);
-            color: var(--primary);
-        }
-
-        /* 昵称设置弹窗样式 */
-        .nickname-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 2000;
-        }
-
-        .nickname-modal.show {
-            display: flex;
-        }
-
-        .nickname-content {
-            background: white;
-            border-radius: var(--radius);
-            padding: 30px;
-            width: 90%;
-            max-width: 400px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-        }
-
-        .nickname-title {
-            font-size: 20px;
-            font-weight: 600;
-            color: var(--primary);
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .nickname-input {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid var(--border);
-            border-radius: var(--radius);
-            font-size: 16px;
-            margin-bottom: 20px;
-            transition: border 0.3s ease;
-        }
-
-        .nickname-input:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-
-        .nickname-btn {
-            width: 100%;
-            padding: 12px;
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            border-radius: var(--radius);
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .nickname-btn:hover {
-            background-color: var(--primary-dark);
-        }
-
-        /* 更新公告样式 */
-        .update-notice {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 100;
-        }
-
-        .update-notice-btn {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            box-shadow: 0 4px 12px rgba(255, 140, 56, 0.3);
-            transition: all 0.3s ease;
-        }
-
-        .update-notice-btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 16px rgba(255, 140, 56, 0.4);
-        }
-
-        .update-notice-btn .badge {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            background: #ff4d4f;
-            color: white;
-            font-size: 10px;
-            padding: 2px 6px;
-            border-radius: 10px;
-            font-weight: bold;
-        }
-
-        /* 更新公告弹窗 */
-        .update-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 3000;
-        }
-
-        .update-modal.show {
-            display: flex;
-        }
-
-        .update-content {
-            background: white;
-            border-radius: var(--radius);
-            padding: 30px;
-            width: 90%;
-            max-width: 500px;
-            max-height: 80vh;
-            overflow-y: auto;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-        }
-
-        .update-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .update-title {
-            font-size: 22px;
-            font-weight: 700;
-            color: var(--primary);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .update-close {
-            background: none;
-            border: none;
-            font-size: 40px;
-            color: var(--text-hint);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            line-height: 1;
-            width: 50px;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-        }
-
-        .update-close:hover {
-            color: var(--text-main);
-            background-color: var(--primary-light);
-        }
-
-        .update-version {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            color: white;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .update-item {
-            margin-bottom: 25px;
-        }
-
-        .update-date {
-            font-size: 14px;
-            color: var(--text-secondary);
-            margin-bottom: 10px;
-            font-weight: 600;
-        }
-
-        .update-features {
-            list-style: none;
-            padding: 0;
-        }
-
-        .update-features li {
-            padding: 8px 0;
-            padding-left: 24px;
-            position: relative;
-            color: var(--text-main);
-        }
-
-        .update-features li:before {
-            content: "✨";
-            position: absolute;
-            left: 0;
+        .toast.show {
+            opacity: 1;
         }
     </style>
 </head>
 <body>
-    <!-- 更新公告按钮 -->
-    <div class="update-notice">
-        <button class="update-notice-btn" onclick="showUpdateModal()">
-            📝
-            <span class="badge">NEW</span>
-        </button>
+    <!-- 背景装饰元素 -->
+    <div class="bg-decoration">
+        <div class="circle circle-1"></div>
+        <div class="circle circle-2"></div>
+        <div class="circle circle-3"></div>
+        <div class="circle circle-4"></div>
+        <div class="circle circle-5"></div>
     </div>
 
-    <div class="app-header">
-        <h1 class="app-title">AI拍</h1>
-        <p class="app-subtitle">一键生成高转化短视频脚本与营销文案</p>
-    </div>
-
-    <!-- 用户信息区域 -->
-    <div class="user-info" id="userInfo">
-        <div class="user-name">
-            👤 <span id="userNameDisplay">游客</span>
-        </div>
-        <button class="btn-edit-name" onclick="showNicknameModal()">修改昵称</button>
-    </div>
-
-    <div class="card">
-        <div class="form-item">
-            <label class="label">创作场景</label>
-            <div class="scene-selector" id="sceneSelector">
-                <div class="scene-card" data-value="餐饮短视频脚本">
-                    <span class="scene-icon">🍜</span>
-                    餐饮探店·短视频脚本
-                </div>
-                <div class="scene-card" data-value="美业门店短视频">
-                    <span class="scene-icon">💅</span>
-                    美业美甲·门店推广
-                </div>
-                <div class="scene-card" data-value="跨境电商社媒文案">
-                    <span class="scene-icon">🛒</span>
-                    跨境电商·社媒种草
-                </div>
-                <div class="scene-card" data-value="知识博主口播脚本">
-                    <span class="scene-icon">📚</span>
-                    知识博主·干货口播
-                </div>
-                <div class="scene-card" data-value="本地生活团购文案">
-                    <span class="scene-icon">🎫</span>
-                    本地生活·团购套餐
-                </div>
-                <div class="scene-card" data-value="文旅探店短视频">
-                    <span class="scene-icon">🏛️</span>
-                    文旅探店·景点讲解
-                </div>
+    <div class="container">
+        <!-- 顶部导航 -->
+        <div class="nav-header">
+            <div class="logo">
+                <div class="logo-icon">AI</div>
+                <div class="logo-text">AI拍</div>
             </div>
-            <input type="hidden" id="scene" value="餐饮短视频脚本">
-        </div>
-
-        <!-- 新增：风格选择 + 视频时长 -->
-        <div class="form-row">
-            <div class="form-item">
-                <label class="label">创作风格</label>
-                <select id="style">
-                    <option value="口语化">口语化（默认）</option>
-                    <option value="专业化">专业化</option>
-                    <option value="搞笑风">搞笑风</option>
-                    <option value="煽情风">煽情风</option>
-                </select>
+            <div class="nav-links">
+                <a href="#" class="nav-link active" onclick="scrollToTop()">首页</a>
+                <a href="#" class="nav-link" onclick="showFeatures()">功能</a>
+                <a href="#" class="nav-link" onclick="showDocs()">文档</a>
+                <a href="#" class="nav-link" onclick="showAbout()">关于</a>
             </div>
-            <div class="form-item">
-                <label class="label">视频时长</label>
-                <select id="duration">
-                    <option value="15秒" selected>15秒（默认）</option>
-                    <option value="30秒">30秒</option>
-                    <option value="60秒">60秒</option>
-                </select>
+            <div class="user-section">
+                <span class="user-name" id="userNameDisplay">创作者</span>
+                <button class="btn-edit" onclick="showNicknameModal()">修改昵称</button>
             </div>
         </div>
 
-        <div class="form-item">
-            <label class="label">核心卖点</label>
-            <textarea id="keyInfo" placeholder="请详细描述产品/服务的核心优势、价格、活动、目标人群等，越具体生成效果越好！"></textarea>
-            <span class="hint">示例：卢浮宫讲解5分钟快速了解镇馆三宝，适合旅游博主口播</span>
+        <!-- 英雄区域 -->
+        <div class="hero-section">
+            <h1 class="hero-title">AI 驱动的智能文案创作</h1>
+            <p class="hero-subtitle">一键生成高转化短视频脚本与营销文案，让创意无限可能</p>
         </div>
 
-        <button class="generate-btn" onclick="generateScript()">
-            <span>生成文案</span>
-        </button>
-
-        <div class="btn-group">
-            <button class="btn-history" onclick="showHistory()">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <polyline points="12 6 12 12 16 14"></polyline>
-                </svg>
-                历史记录
-            </button>
-            <button class="btn-favorites" onclick="showFavorites()">
-                ❤️
-                我的收藏
-            </button>
-        </div>
-    </div>
-
-    <div class="card result-card">
-        <div class="result-header">
-            <h3 class="result-title">生成结果</h3>
-            <button class="copy-btn" onclick="copyResult()" id="copyBtn">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                </svg>
-                复制文案
-            </button>
-        </div>
-        <div class="schemes-container">
-            <button class="scheme-nav prev" onclick="prevScheme()" id="prevBtn" disabled>
-                &#8249;
-            </button>
-            <div class="schemes-wrapper" id="schemesWrapper">
-                <div class="scheme-card active" id="singleResult">
-                    <div class="result-content" id="result">
-                        点击上方「生成文案」按钮，优质脚本将在此呈现...
-                    </div>
+        <!-- 主要内容 -->
+        <div class="main-content">
+            <!-- 左侧表单 -->
+            <div class="form-section">
+                <div class="form-header">
+                    <h2 class="form-title">创作设置</h2>
+                    <p class="form-subtitle">填写以下信息，AI 将为您生成专业的文案</p>
                 </div>
-            </div>
-            <button class="scheme-nav next" onclick="nextScheme()" id="nextBtn" disabled>
-                &#8250;
-            </button>
-        </div>
-        <div class="scheme-dots" id="schemeDots"></div>
-    </div>
 
-    <div class="success-toast" id="toast">复制成功！</div>
-
-    <!-- 历史记录弹窗 -->
-    <div class="modal-overlay" id="historyModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">历史记录</h3>
-                <button class="modal-close" onclick="closeHistory()">&times;</button>
-            </div>
-            <div class="modal-body" id="historyList">
-                <!-- 历史记录列表将在这里动态加载 -->
-            </div>
-        </div>
-    </div>
-
-    <!-- 昵称设置弹窗 -->
-    <div class="nickname-modal" id="nicknameModal">
-        <div class="nickname-content">
-            <h3 class="nickname-title">设置你的昵称</h3>
-            <input type="text" class="nickname-input" id="nicknameInput" placeholder="请输入你的昵称">
-            <button class="nickname-btn" onclick="saveNickname()">保存</button>
-        </div>
-    </div>
-
-    <!-- 我的收藏弹窗 -->
-    <div class="favorites-modal" id="favoritesModal">
-        <div class="favorites-content">
-            <div class="favorites-header">
-                <div class="favorites-title">
-                    ❤️ 我的收藏
-                </div>
-                <button class="update-close" onclick="closeFavorites()">&times;</button>
-            </div>
-            <div id="favoritesList">
-                <div class="empty-favorites">
-                    还没有收藏任何文案，快去收藏吧！
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 更新公告弹窗 -->
-    <div class="update-modal" id="updateModal">
-        <div class="update-content">
-            <div class="update-header">
-                <div class="update-title">
-                    🚀 更新公告
-                    <span class="update-version">AI拍 1.0</span>
-                </div>
-                <button class="update-close" onclick="closeUpdateModal()">&times;</button>
-            </div>
-            
-            <div class="update-item">
-                <div class="update-date">📅 2026年2月22日 - 首次发布</div>
-                <ul class="update-features">
-                    <li>支持餐饮、美业、跨境电商等6大场景、4大创作风格</li>
-                    <li>3种方案一键生成，灵活选择</li>
-                    <li>AI自动生成场景专属语料库，无需手动上传</li>
-                    <li>历史记录、收藏功能，随时查看之前的文案</li>
-                    <li>用户昵称设置，数据永久保存在本地</li>
-                    <li>支持15秒、30秒、60秒三种视频时长</li>
-                    <li>一键复制功能，方便快捷</li>
-                    <li>精美卡片式设计，左右滑动切换方案</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-
-    <!-- 新版本提示弹窗 -->
-    <div class="update-modal" id="newVersionModal">
-        <div class="update-content">
-            <div class="update-header">
-                <div class="update-title">
-                    🎉 发现新版本！
-                </div>
-                <button class="update-close" onclick="closeNewVersionModal()">&times;</button>
-            </div>
-            
-            <div class="update-item">
-                <div class="new-version-info">
-                    <p><strong>当前版本：</strong> <span id="currentVersionDisplay"></span></p>
-                    <p><strong>最新版本：</strong> <span id="latestVersionDisplay"></span></p>
-                </div>
-                <div class="update-buttons">
-                    <button class="btn-primary" onclick="goToDownload()">去下载</button>
-                    <button class="btn-secondary" onclick="closeNewVersionModal()">稍后再说</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        const API_URL = "/api/script/create";
-        // 版本信息
-        const APP_VERSION = "1.0.0";
-        const GITHUB_REPO = "Meng-p7/ai_copywriter"; // 记得改成你的 GitHub 用户名
-        
-        // 用户信息（单机版用固定ID）
-        let USER_ID = "local_user_fixed_id_2026";
-        let userName = "";
-        
-        // 当前生成的文案信息
-        let currentScriptInfo = null;
-        
-        // 初始化用户信息
-        function initUser() {
-            const savedUserName = localStorage.getItem('ai_copywriter_user_name');
-            
-            if (savedUserName) {
-                userName = savedUserName;
-                document.getElementById('userNameDisplay').textContent = userName;
-            } else {
-                userName = "创作者";
-                document.getElementById('userNameDisplay').textContent = userName;
-            }
-        }
-
-        // 检查更新
-        async function checkForUpdates() {
-            try {
-                const response = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/releases/latest`);
-                if (!response.ok) return;
-                
-                const data = await response.json();
-                const latestVersion = data.tag_name.replace('v', '');
-                
-                if (isNewerVersion(latestVersion, APP_VERSION)) {
-                    showNewVersionModal(APP_VERSION, latestVersion);
-                }
-            } catch (e) {
-                console.log('检查更新失败:', e);
-            }
-        }
-
-        // 比较版本号
-        function isNewerVersion(latest, current) {
-            const latestParts = latest.split('.').map(Number);
-            const currentParts = current.split('.').map(Number);
-            
-            for (let i = 0; i < Math.max(latestParts.length, currentParts.length); i++) {
-                const l = latestParts[i] || 0;
-                const c = currentParts[i] || 0;
-                if (l > c) return true;
-                if (l < c) return false;
-            }
-            return false;
-        }
-
-        // 显示新版本提示
-        function showNewVersionModal(current, latest) {
-            document.getElementById('currentVersionDisplay').textContent = 'v' + current;
-            document.getElementById('latestVersionDisplay').textContent = 'v' + latest;
-            document.getElementById('newVersionModal').classList.add('show');
-        }
-
-        // 关闭新版本提示
-        function closeNewVersionModal() {
-            document.getElementById('newVersionModal').classList.remove('show');
-        }
-
-        // 跳转到下载页面
-        function goToDownload() {
-            window.open(`https://github.com/${GITHUB_REPO}/releases/latest`, '_blank');
-        }
-        
-        // 显示昵称设置弹窗
-        function showNicknameModal() {
-            const modal = document.getElementById('nicknameModal');
-            const input = document.getElementById('nicknameInput');
-            input.value = userName;
-            modal.classList.add('show');
-            input.focus();
-        }
-        
-        // 保存昵称
-        function saveNickname() {
-            const input = document.getElementById('nicknameInput');
-            const newName = input.value.trim();
-            
-            if (!newName) {
-                alert('请输入昵称');
-                return;
-            }
-            
-            userName = newName;
-            localStorage.setItem('ai_copywriter_user_name', userName);
-            document.getElementById('userNameDisplay').textContent = userName;
-            document.getElementById('nicknameModal').classList.remove('show');
-        }
-        
-        // 保存原始文本（用于复制）
-        let originalScript = "";
-        // 保存所有方案
-        let allSchemes = [];
-        // 当前选中的方案索引
-        let currentSchemeIndex = 0;
-
-        // 初始化用户
-        initUser();
-
-        // 显示更新公告
-        function showUpdateModal() {
-            document.getElementById('updateModal').classList.add('show');
-        }
-
-        // 关闭更新公告
-        function closeUpdateModal() {
-            document.getElementById('updateModal').classList.remove('show');
-        }
-
-        // 每次打开都弹出更新公告
-        setTimeout(() => {
-            showUpdateModal();
-        }, 500);
-
-        // 当前收藏列表缓存
-        let currentFavorites = [];
-
-        // 获取收藏列表（从数据库）
-        async function loadFavorites() {
-            try {
-                const response = await fetch(`/api/favorites/list?user_id=${USER_ID}`);
-                const data = await response.json();
-                if (data.code === 200) {
-                    currentFavorites = data.data || [];
-                    return currentFavorites;
-                }
-                return [];
-            } catch (e) {
-                console.error(e);
-                return [];
-            }
-        }
-
-        // 检查是否已收藏
-        async function checkFavorite(schemeIndex) {
-            if (!currentScriptInfo) return false;
-            await loadFavorites();
-            const schemeName = `方案${schemeIndex + 1}`;
-            return currentFavorites.some(f => 
-                f.scene === currentScriptInfo.scene && 
-                f.scheme_name === schemeName &&
-                f.content === currentScriptInfo.schemes[schemeIndex]
-            );
-        }
-
-        // 切换收藏状态
-        async function toggleFavorite(schemeIndex) {
-            if (!currentScriptInfo) {
-                alert('请先生成文案！');
-                return;
-            }
-
-            const schemeName = `方案${schemeIndex + 1}`;
-            const content = currentScriptInfo.schemes[schemeIndex];
-            
-            await loadFavorites();
-            const existing = currentFavorites.find(f => 
-                f.scene === currentScriptInfo.scene && 
-                f.scheme_name === schemeName &&
-                f.content === content
-            );
-
-            if (existing) {
-                // 取消收藏
-                try {
-                    await fetch(`/api/favorites/${existing.id}?user_id=${USER_ID}`, {
-                        method: 'DELETE'
-                    });
-                    const btn = document.querySelector(`.scheme-card[data-index="${schemeIndex}"] .favorite-btn`);
-                    if (btn) {
-                        btn.classList.remove('active');
-                        btn.innerHTML = '🤍';
-                    }
-                    showToast('已取消收藏');
-                } catch (e) {
-                    console.error(e);
-                    showToast('取消收藏失败');
-                }
-            } else {
-                // 添加收藏
-                try {
-                    const params = new URLSearchParams({
-                        user_id: USER_ID,
-                        scene: currentScriptInfo.scene,
-                        style: currentScriptInfo.style,
-                        duration: currentScriptInfo.duration,
-                        key_info: currentScriptInfo.keyInfo,
-                        content: content,
-                        scheme_index: schemeIndex,
-                        scheme_name: schemeName
-                    });
-                    await fetch(`/api/favorites/add?${params}`, {
-                        method: 'POST'
-                    });
-                    const btn = document.querySelector(`.scheme-card[data-index="${schemeIndex}"] .favorite-btn`);
-                    if (btn) {
-                        btn.classList.add('active');
-                        btn.innerHTML = '❤️';
-                    }
-                    showToast('收藏成功！');
-                } catch (e) {
-                    console.error(e);
-                    showToast('收藏失败');
-                }
-            }
-        }
-
-        // 显示收藏列表
-        async function showFavorites() {
-            const modal = document.getElementById('favoritesModal');
-            const list = document.getElementById('favoritesList');
-            
-            list.innerHTML = '<div class="empty-favorites">加载中...</div>';
-            modal.classList.add('show');
-            
-            const favorites = await loadFavorites();
-
-            if (favorites.length === 0) {
-                list.innerHTML = '<div class="empty-favorites">还没有收藏任何文案，快去收藏吧！</div>';
-            } else {
-                list.innerHTML = favorites.map((fav, index) => `
-                    <div class="favorite-item" data-id="${fav.id}">
-                        <div class="favorite-item-header">
-                            <div class="favorite-item-scene">${fav.scene} - ${fav.scheme_name || '方案'}</div>
-                            <div class="favorite-item-time">${fav.create_time}</div>
+                <!-- 场景选择 -->
+                <div class="form-item">
+                    <label class="label">创作场景</label>
+                    <div class="scene-selector" id="sceneSelector">
+                        <div class="scene-card" data-value="餐饮短视频脚本">
+                            <span class="scene-icon">🍜</span>
+                            餐饮探店
                         </div>
-                        <div class="favorite-item-info">
-                            时长：${fav.duration} | 风格：${fav.style}
+                        <div class="scene-card" data-value="美业门店短视频">
+                            <span class="scene-icon">💅</span>
+                            美业美甲
                         </div>
-                        <div class="favorite-item-actions">
-                            <button class="favorite-btn-view" onclick="viewFavorite(${index})">查看</button>
-                            <button class="favorite-btn-delete" onclick="deleteFavorite('${fav.id}')">删除</button>
+                        <div class="scene-card" data-value="跨境电商社媒文案">
+                            <span class="scene-icon">🛒</span>
+                            跨境电商
+                        </div>
+                        <div class="scene-card" data-value="知识讲解课程">
+                            <span class="scene-icon">📚</span>
+                            知识讲解
+                        </div>
+                        <div class="scene-card" data-value="文旅宣传短视频">
+                            <span class="scene-icon">🏖️</span>
+                            文旅宣传
+                        </div>
+                        <div class="scene-card" data-value="本地生活团购短视频">
+                            <span class="scene-icon">🎯</span>
+                            生活团购
                         </div>
                     </div>
-                `).join('');
-            }
-        }
+                </div>
 
-        // 关闭收藏弹窗
-        function closeFavorites() {
-            document.getElementById('favoritesModal').classList.remove('show');
-        }
+                <!-- 风格和时长 -->
+                <div class="form-row">
+                    <div class="form-item">
+                        <label class="label">创作风格</label>
+                        <select id="style">
+                            <option value="口语化">口语化</option>
+                            <option value="专业化">专业化</option>
+                            <option value="搞笑风">搞笑风</option>
+                            <option value="煽情风">煽情风</option>
+                        </select>
+                    </div>
+                    <div class="form-item">
+                        <label class="label">视频时长</label>
+                        <select id="duration">
+                            <option value="15秒">15秒</option>
+                            <option value="30秒" selected>30秒</option>
+                            <option value="60秒">60秒</option>
+                        </select>
+                    </div>
+                </div>
 
-        // 查看收藏内容
-        async function viewFavorite(index) {
-            const favorites = await loadFavorites();
-            const fav = favorites[index];
-            if (fav) {
-                // 只显示收藏的那一个方案
-                allSchemes = [fav.content];
-                originalScript = fav.content;
-                currentSchemeIndex = 0;
-                
-                // 保存currentScriptInfo
-                currentScriptInfo = {
-                    scene: fav.scene,
-                    style: fav.style,
-                    duration: fav.duration,
-                    keyInfo: fav.key_info,
-                    schemes: allSchemes,
-                    time: fav.create_time
-                };
-                
-                renderSchemes();
-                closeFavorites();
-                
-                // 滚动到结果区域
-                document.querySelector('.result-card').scrollIntoView({ behavior: 'smooth' });
-            }
-        }
+                <!-- 核心信息 -->
+                <div class="form-item">
+                    <label class="label">核心信息</label>
+                    <textarea id="keyInfo" placeholder="请输入核心卖点和关键信息，信息越详细生成效果越好..."></textarea>
+                </div>
 
-        // 删除收藏
-        async function deleteFavorite(favoriteId) {
-            if (confirm('确定要删除这条收藏吗？')) {
-                try {
-                    await fetch(`/api/favorites/${favoriteId}?user_id=${USER_ID}`, {
-                        method: 'DELETE'
-                    });
-                    showFavorites();
-                    showToast('已删除');
-                } catch (e) {
-                    console.error(e);
-                    showToast('删除失败');
-                }
-            }
-        }
+                <!-- 生成按钮 -->
+                <button class="generate-btn" onclick="generateScript()" id="generateBtn">
+                    🤖 生成文案
+                </button>
+            </div>
 
-        // 场景卡片选择器逻辑
-        document.addEventListener('DOMContentLoaded', function() {
-            // 初始化用户信息
-            initUser();
-            
-            // 检查更新
-            setTimeout(() => {
-                checkForUpdates();
-            }, 1000);
-            
-            // 按Enter键保存昵称
-            const nicknameInput = document.getElementById('nicknameInput');
-            if (nicknameInput) {
-                nicknameInput.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter') {
-                        saveNickname();
-                    }
-                });
-            }
-            
-            const sceneCards = document.querySelectorAll('.scene-card');
-            const sceneInput = document.getElementById('scene');
+            <!-- 右侧结果 -->
+            <div class="result-section">
+                <div class="result-header">
+                    <h3 class="result-title">生成结果</h3>
+                    <div class="result-actions">
+                        <button class="action-btn" onclick="showHistory()">📋 历史</button>
+                        <button class="action-btn" onclick="showFavorites()">❤️ 收藏</button>
+                    </div>
+                </div>
 
-            // 默认选中第一个卡片
-            if (sceneCards.length > 0) {
-                sceneCards[0].classList.add('active');
-            }
-
-            sceneCards.forEach(card => {
-                card.addEventListener('click', function() {
-                    // 移除所有卡片的active状态
-                    sceneCards.forEach(c => c.classList.remove('active'));
-                    // 给当前点击的卡片添加active状态
-                    this.classList.add('active');
-                    // 更新隐藏input的值
-                    sceneInput.value = this.getAttribute('data-value');
-                });
-            });
-        });
-
-        async function generateScript() {
-            const scene = document.getElementById("scene").value;
-            const style = document.getElementById("style").value;
-            const duration = document.getElementById("duration").value;
-            const keyInfo = document.getElementById("keyInfo").value.trim();
-            const schemesWrapper = document.getElementById("schemesWrapper");
-            const btn = document.querySelector(".generate-btn");
-
-            if (!keyInfo) {
-                alert("请填写核心卖点，信息越详细生成效果越好！");
-                return;
-            }
-
-            // 加载状态
-            btn.disabled = true;
-            btn.innerHTML = '<span>生成中...</span>';
-            schemesWrapper.innerHTML = `
-                <div class="scheme-card active">
-                    <div class="loading">
-                        <span>AI正在为你构思多种方案...</span>
+                <!-- 方案显示容器 -->
+                <div class="scheme-container" id="schemeContainer">
+                    <div class="loading" id="loadingState" style="display: none;">
+                        <div class="loading-icon">🤖</div>
+                        <div class="loading-text">AI 正在创作中...</div>
                         <div class="loading-dots">
                             <div class="loading-dot"></div>
                             <div class="loading-dot"></div>
                             <div class="loading-dot"></div>
                         </div>
                     </div>
-                </div>
-            `;
-            document.getElementById("schemeDots").innerHTML = "";
-            document.getElementById("prevBtn").disabled = true;
-            document.getElementById("nextBtn").disabled = true;
-
-            try {
-                const response = await fetch(API_URL, {
-                    method: "POST",
-                    headers: {"Content-Type": "application/json"},
-                    body: JSON.stringify({
-                        user_id: USER_ID,
-                        scene: scene,
-                        style: style,
-                        duration: duration,
-                        key_info: keyInfo
-                    })
-                });
-
-                const data = await response.json();
-                if (data.code === 200) {
-                    allSchemes = data.data.schemes || [data.data.content];
-                    originalScript = allSchemes[0];
-                    currentSchemeIndex = 0;
-                    
-                    // 保存当前生成的文案信息
-                    currentScriptInfo = {
-                        scene: scene,
-                        style: style,
-                        duration: duration,
-                        keyInfo: keyInfo,
-                        schemes: allSchemes,
-                        time: new Date().toLocaleString('zh-CN')
-                    };
-                    
-                    renderSchemes();
-                } else {
-                    allSchemes = [];
-                    originalScript = "";
-                    currentScriptInfo = null;
-                    schemesWrapper.innerHTML = `
-                        <div class="scheme-card active">
-                            <div class="result-content">生成失败：${data.msg || "服务器繁忙，请稍后再试"}</div>
+                    <div id="schemeContent">
+                        <div style="display: flex; align-items: center; justify-content: center; height: 400px; color: var(--text-hint);">
+                            请选择创作场景并填写核心信息，点击生成文案按钮
                         </div>
-                    `;
-                }
-            } catch (e) {
-                allSchemes = [];
-                originalScript = "";
-                schemesWrapper.innerHTML = `
-                    <div class="scheme-card active">
-                        <div class="result-content">请求失败：请检查后端服务是否正常运行</div>
                     </div>
-                `;
-                console.error(e);
-            } finally {
-                // 恢复状态
-                btn.disabled = false;
-                btn.innerHTML = '<span>生成文案</span>';
-            }
-        }
+                </div>
+            </div>
+        </div>
+    </div>
 
-        // 渲染所有方案
-        async function renderSchemes() {
-            const schemesWrapper = document.getElementById("schemesWrapper");
-            const schemeDots = document.getElementById("schemeDots");
+    <!-- 昵称设置模态框 -->
+    <div class="modal" id="nicknameModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">修改昵称</h3>
+                <button class="modal-close" onclick="closeNicknameModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="nicknameInput" placeholder="请输入新昵称" class="form-item">
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeNicknameModal()">取消</button>
+                <button class="btn-primary" onclick="saveNickname()">保存</button>
+            </div>
+        </div>
+    </div>
 
-            schemesWrapper.innerHTML = "";
-            schemeDots.innerHTML = "";
+    <!-- 历史记录模态框 -->
+    <div class="modal" id="historyModal">
+        <div class="modal-content" style="max-height: 80vh; overflow-y: auto;">
+            <div class="modal-header">
+                <h3 class="modal-title">历史记录</h3>
+                <button class="modal-close" onclick="closeHistoryModal()">×</button>
+            </div>
+            <div class="modal-body" id="historyContent" style="max-height: 60vh; overflow-y: auto;">
+                <!-- 历史记录将在这里动态生成 -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeHistoryModal()">关闭</button>
+            </div>
+        </div>
+    </div>
 
-            // 先加载收藏状态
-            const favorites = await loadFavorites();
+    <!-- 收藏模态框 -->
+    <div class="modal" id="favoritesModal">
+        <div class="modal-content" style="max-height: 80vh; overflow-y: auto;">
+            <div class="modal-header">
+                <h3 class="modal-title">我的收藏</h3>
+                <button class="modal-close" onclick="closeFavoritesModal()">×</button>
+            </div>
+            <div class="modal-body" id="favoritesContent" style="max-height: 60vh; overflow-y: auto;">
+                <!-- 收藏内容将在这里动态生成 -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeFavoritesModal()">关闭</button>
+            </div>
+        </div>
+    </div>
 
-            allSchemes.forEach((scheme, index) => {
-                const schemeName = `方案${index + 1}`;
-                const isFavorited = currentScriptInfo && favorites.some(f => 
-                    f.scene === currentScriptInfo.scene && 
-                    f.scheme_name === schemeName &&
-                    f.content === scheme
-                );
-                
-                // 创建方案卡片
-                const card = document.createElement("div");
-                card.className = "scheme-card" + (index === currentSchemeIndex ? " active" : " inactive");
-                card.dataset.index = index;
-                
-                // 如果只有一个方案（收藏的），标签显示"已收藏"
-                const labelText = allSchemes.length === 1 ? "已收藏" : `方案 ${index + 1}`;
-                
-                card.innerHTML = `
-                    <button class="favorite-btn ${isFavorited ? 'active' : ''}" onclick="toggleFavorite(${index})">
-                        ${isFavorited ? '❤️' : '🤍'}
-                    </button>
-                    <div class="scheme-label">${labelText}</div>
-                    <div class="result-content">${formatScript(scheme)}</div>
-                `;
-                schemesWrapper.appendChild(card);
+    <!-- 功能页面模态框 -->
+    <div class="modal" id="featuresModal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h3 class="modal-title">功能介绍</h3>
+                <button class="modal-close" onclick="closeFeaturesModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div style="padding: 20px;">
+                    <h4 style="color: var(--primary); margin-bottom: 16px; font-size: 18px;">AI 文案生成</h4>
+                    <p style="margin-bottom: 16px; color: var(--text-secondary);">基于先进的 AI 技术，为您生成高质量的短视频脚本和营销文案，支持多种创作场景和风格。</p>
+                    
+                    <h4 style="color: var(--primary); margin-bottom: 16px; font-size: 18px;">多场景支持</h4>
+                    <p style="margin-bottom: 16px; color: var(--text-secondary);">支持餐饮探店、美业美甲、跨境电商、知识讲解等多种创作场景，满足不同行业的需求。</p>
+                    
+                    <h4 style="color: var(--primary); margin-bottom: 16px; font-size: 18px;">个性化定制</h4>
+                    <p style="margin-bottom: 16px; color: var(--text-secondary);">可根据您的需求选择不同的创作风格和视频时长，生成符合您期望的文案内容。</p>
+                    
+                    <h4 style="color: var(--primary); margin-bottom: 16px; font-size: 18px;">历史记录</h4>
+                    <p style="margin-bottom: 16px; color: var(--text-secondary);">自动保存您的创作历史，方便您随时查看和管理过去的创作内容。</p>
+                    
+                    <h4 style="color: var(--primary); margin-bottom: 16px; font-size: 18px;">收藏功能</h4>
+                    <p style="margin-bottom: 16px; color: var(--text-secondary);">收藏您喜欢的文案方案，方便后续查看和使用。</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeFeaturesModal()">关闭</button>
+            </div>
+        </div>
+    </div>
 
-                // 创建方案指示点（只有一个方案时不显示）
-                if (allSchemes.length > 1) {
-                    const dot = document.createElement("div");
-                    dot.className = "scheme-dot" + (index === currentSchemeIndex ? " active" : "");
-                    dot.dataset.index = index;
-                    dot.onclick = () => goToScheme(index);
-                    schemeDots.appendChild(dot);
-                }
-            });
+    <!-- 文档页面模态框 -->
+    <div class="modal" id="docsModal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h3 class="modal-title">使用文档</h3>
+                <button class="modal-close" onclick="closeDocsModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div style="padding: 20px;">
+                    <h4 style="color: var(--primary); margin-bottom: 16px; font-size: 18px;">快速开始</h4>
+                    <ol style="margin-bottom: 24px; color: var(--text-secondary); padding-left: 20px;">
+                        <li style="margin-bottom: 8px;">选择创作场景（如餐饮探店、美业美甲等）</li>
+                        <li style="margin-bottom: 8px;">选择创作风格和视频时长</li>
+                        <li style="margin-bottom: 8px;">填写核心信息，描述您的产品或服务特点</li>
+                        <li style="margin-bottom: 8px;">点击"生成文案"按钮</li>
+                        <li style="margin-bottom: 8px;">查看生成的文案方案</li>
+                    </ol>
+                    
+                    <h4 style="color: var(--primary); margin-bottom: 16px; font-size: 18px;">创作场景说明</h4>
+                    <ul style="margin-bottom: 24px; color: var(--text-secondary); padding-left: 20px;">
+                        <li style="margin-bottom: 8px;"><strong>餐饮探店</strong>：适用于餐厅、咖啡店、美食推荐等场景</li>
+                        <li style="margin-bottom: 8px;"><strong>美业美甲</strong>：适用于美容院、美甲店、美发店等场景</li>
+                        <li style="margin-bottom: 8px;"><strong>跨境电商</strong>：适用于海外购物、跨境商品推广等场景</li>
+                        <li style="margin-bottom: 8px;"><strong>知识讲解</strong>：适用于在线课程、知识产品推广等场景</li>
+                        <li style="margin-bottom: 8px;"><strong>生活团购</strong>：适用于本地生活团购、团购活动等场景</li>
+                        <li style="margin-bottom: 8px;"><strong>文旅宣传</strong>：适用于文旅宣传、旅游推荐等场景</li>
+                    </ul>
+                    
+                    <h4 style="color: var(--primary); margin-bottom: 16px; font-size: 18px;">创作风格说明</h4>
+                    <ul style="margin-bottom: 24px; color: var(--text-secondary); padding-left: 20px;">
+                        <li style="margin-bottom: 8px;"><strong>口语化</strong>：语言自然，像日常对话一样</li>
+                        <li style="margin-bottom: 8px;"><strong>专业化</strong>：语言正式，突出专业知识和数据</li>
+                        <li style="margin-bottom: 8px;"><strong>搞笑风</strong>：语言幽默，引人发笑</li>
+                        <li style="margin-bottom: 8px;"><strong>煽情风</strong>：语言感性，打动人心</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeDocsModal()">关闭</button>
+            </div>
+        </div>
+    </div>
 
-            // 等待DOM渲染后更新
-            setTimeout(() => {
-                updateSchemeDisplay();
-            }, 50);
-        }
-
-        // 切换到上一个方案
-        function prevScheme() {
-            if (currentSchemeIndex > 0) {
-                currentSchemeIndex--;
-                updateSchemeDisplay();
-            }
-        }
-
-        // 切换到下一个方案
-        function nextScheme() {
-            if (currentSchemeIndex < allSchemes.length - 1) {
-                currentSchemeIndex++;
-                updateSchemeDisplay();
-            }
-        }
-
-        // 跳转到指定方案
-        function goToScheme(index) {
-            currentSchemeIndex = index;
-            updateSchemeDisplay();
-        }
-
-        // 更新方案显示 - 核心修复：动态计算居中位移
-        function updateSchemeDisplay() {
-            const cards = document.querySelectorAll(".scheme-card");
-            const dots = document.querySelectorAll(".scheme-dot");
-            const prevBtn = document.getElementById("prevBtn");
-            const nextBtn = document.getElementById("nextBtn");
-            const schemesWrapper = document.getElementById("schemesWrapper");
-            const container = document.querySelector(".schemes-container");
-
-            // 更新当前选中的方案文本
-            originalScript = allSchemes[currentSchemeIndex];
-
-            // 更新卡片样式
-            cards.forEach((card, index) => {
-                card.classList.remove("active", "inactive");
-                if (index === currentSchemeIndex) {
-                    card.classList.add("active");
-                } else {
-                    card.classList.add("inactive");
-                }
-            });
-
-            // 更新指示点
-            dots.forEach((dot, index) => {
-                dot.classList.remove("active");
-                if (index === currentSchemeIndex) {
-                    dot.classList.add("active");
-                }
-            });
-
-            // 核心修复：动态计算位移，确保当前卡片居中
-            if (cards.length > 0) {
-                // 获取容器和卡片的实际尺寸
-                const containerWidth = container.offsetWidth;
-                const cardWidth = cards[0].offsetWidth;
-                // 计算单个卡片的偏移量（容器中心 - 卡片中心）
-                const baseOffset = (containerWidth - cardWidth) / 2;
-                // 计算整体滑动位移：-当前索引*卡片宽度 + 基础偏移（抵消卡片左侧空白）
-                const offsetX = - (currentSchemeIndex * (cardWidth + 20)) + baseOffset;
-                
-                schemesWrapper.style.transform = `translateX(${offsetX}px)`;
-            }
-
-            // 更新导航按钮状态
-            prevBtn.disabled = currentSchemeIndex === 0;
-            nextBtn.disabled = currentSchemeIndex === allSchemes.length - 1;
-        }
-
-        // 核心：格式化脚本，精准解析镜头/台词/配乐，兜底空值
-        function formatScript(scriptText) {
-            // 1. 提取标题
-            const titleMatch = scriptText.match(/标题[:：]\s*(.+)/);
-            const title = titleMatch ? titleMatch[1].trim() : "无标题";
-            const rest = scriptText.replace(/标题[:：]\s*.+/, "").trim();
-
-            // 2. 提取统一配乐建议
-            const musicMatch = rest.match(/配乐建议[:：]\s*(.+)/);
-            const music = musicMatch ? musicMatch[1].trim() : "";
-            const shotsContent = rest.replace(/配乐建议[:：]\s*.+/, "").trim();
-
-            // 3. 按镜头分组（匹配镜头1、镜头2...）
-            const shotRegex = /镜头(\d+)[:：]\s*(.+?)(?=镜头\d+[:：]|$)/gs;
-            const matches = [...shotsContent.matchAll(shotRegex)];
-
-            let html = `<div class="script-title">【视频标题】${title}</div>`;
-
-            // 显示统一配乐建议
-            if (music) {
-                html += `
-                    <div class="music-suggestion">
-                        <span class="music-suggestion-label">🎵 配乐建议：</span>${music}
+    <!-- 关于页面模态框 -->
+    <div class="modal" id="aboutModal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3 class="modal-title">关于 AI 拍</h3>
+                <button class="modal-close" onclick="closeAboutModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div style="padding: 20px; text-align: center;">
+                    <div style="width: 80px; height: 80px; background: var(--primary-gradient); border-radius: 20px; display: flex; align-items: center; justify-content: center; color: white; font-size: 32px; font-weight: bold; margin: 0 auto 24px;">AI</div>
+                    <h4 style="color: var(--primary); margin-bottom: 16px; font-size: 24px;">AI 拍</h4>
+                    <p style="margin-bottom: 24px; color: var(--text-secondary);">AI 驱动的智能文案创作工具，为您提供高质量的短视频脚本和营销文案。</p>
+                    <div style="margin-bottom: 24px; color: var(--text-secondary);">
+                        <p style="margin-bottom: 8px;">版本：1.1.0</p>
+                        <p style="margin-bottom: 8px;">开发者：Dream工作室</p>
+                        <p style="margin-bottom: 8px;">联系邮箱：1685920009@qq.com</p>
                     </div>
-                `;
-            }
+                    <p style="color: var(--text-hint); font-size: 14px;">© 2026 AI 拍. 保留所有权利.</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeAboutModal()">关闭</button>
+            </div>
+        </div>
+    </div>
 
-            if (matches.length === 0) {
-                html += `<div>${shotsContent}</div>`;
-                return html;
-            }
+    <!-- 提示消息 -->
+    <div class="toast" id="toast"></div>
 
-            matches.forEach(match => {
-                const num = match[1];
-                let content = match[2].trim();
+    <script>
+        // 全局变量
+        let currentScheme = "";
+        let USER_ID = "local_user_fixed_id_2026";
+        let userName = "创作者";
+        let currentGenerateParams = null;
 
-                // 兜底：如果一行里同时出现镜头和台词，尝试拆分
-                let camera = "";
-                let dialogue = "";
-
-                // 先尝试匹配标准格式
-                const dialogueMatch = content.match(/台词(\d+)[:：]\s*(.+)/);
-
-                if (dialogueMatch) {
-                    // 标准格式：镜头、台词分离
-                    camera = content.replace(/台词\d+[:：].+/, "").trim();
-                    dialogue = dialogueMatch[2].trim();
-                } else {
-                    // 兜底格式：尝试从一行里拆分
-                    const dialoguePart = content.split(/台词\d+[:：]/);
-                    if (dialoguePart.length > 1) {
-                        dialogue = dialoguePart[1].trim();
-                        camera = dialoguePart[0].trim();
-                    } else {
-                        // 如果还是没找到台词，就把整行当作镜头
-                        camera = content;
-                        dialogue = '<span class="empty-hint">（台词待补充，可根据镜头自由发挥）</span>';
-                    }
-                }
-
-                camera = camera || '<span class="empty-hint">（镜头描述待补充）</span>';
-
-                html += `
-                    <div class="shot-item">
-                        <div class="shot-num">镜头 ${num}</div>
-                        <div class="shot-camera"><span class="shot-label">镜头：</span>${camera}</div>
-                        <div class="shot-dialogue"><span class="shot-label">台词：</span>${dialogue}</div>
-                    </div>
-                `;
-            });
-
-            return html;
+        // 初始化
+        function init() {
+            initUser();
+            initSceneSelector();
+            setupInputListeners();
         }
 
-        function copyResult() {
-            const toast = document.getElementById("toast");
+        // 初始化用户信息
+        function initUser() {
+            const savedUserName = localStorage.getItem('ai_copywriter_user_name');
+            if (savedUserName) {
+                userName = savedUserName;
+                document.getElementById('userNameDisplay').textContent = userName;
+            }
+        }
 
-            if (!originalScript || originalScript.includes("点击上方") || originalScript.includes("生成失败")) {
-                alert("暂无可用文案可复制");
+        // 初始化场景选择器
+        function initSceneSelector() {
+            const sceneCards = document.querySelectorAll('.scene-card');
+            sceneCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    sceneCards.forEach(c => c.classList.remove('active'));
+                    this.classList.add('active');
+                    resetGenerateButton();
+                });
+            });
+            // 默认选择第一个
+            if (sceneCards.length > 0) {
+                sceneCards[0].classList.add('active');
+            }
+        }
+
+        // 重置生成按钮文字
+        function resetGenerateButton() {
+            const generateBtn = document.getElementById('generateBtn');
+            generateBtn.innerHTML = '🤖 生成文案';
+        }
+
+        // 监听输入变化，重置按钮文字
+        function setupInputListeners() {
+            document.getElementById('style').addEventListener('change', resetGenerateButton);
+            document.getElementById('duration').addEventListener('change', resetGenerateButton);
+            document.getElementById('keyInfo').addEventListener('input', resetGenerateButton);
+        }
+
+        // 滚动到表单
+        function scrollToForm() {
+            document.querySelector('.form-section').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // 生成文案
+        async function generateScript() {
+            const sceneCard = document.querySelector('.scene-card.active');
+            if (!sceneCard) {
+                showToast('请选择创作场景');
                 return;
             }
 
-            // 复制原始纯文本（不带样式）
-            navigator.clipboard.writeText(originalScript).then(() => {
-                showToast("复制成功！");
-            }).catch(() => {
-                alert("复制失败，请手动选中复制");
-            });
+            const scene = sceneCard.dataset.value;
+            const style = document.getElementById('style').value;
+            const duration = document.getElementById('duration').value;
+            const keyInfo = document.getElementById('keyInfo').value.trim();
+
+            if (!keyInfo) {
+                showToast('请填写核心信息');
+                return;
+            }
+
+            // 保存当前生成参数，用于再次生成
+            currentGenerateParams = {
+                user_id: USER_ID,
+                scene: scene,
+                style: style,
+                duration: duration,
+                key_info: keyInfo
+            };
+
+            // 显示加载状态
+            document.getElementById('loadingState').style.display = 'flex';
+            document.getElementById('schemeContent').style.display = 'none';
+
+            // 修改按钮文字
+            const generateBtn = document.getElementById('generateBtn');
+            generateBtn.innerHTML = '🤖 不满意？点击再次生成';
+
+            try {
+                const response = await fetch('/api/script/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(currentGenerateParams)
+                });
+
+                const data = await response.json();
+                if (data.code === 200) {
+                    // 只取第一个方案
+                    if (data.data.schemes && data.data.schemes.length > 0) {
+                        currentScheme = data.data.schemes[0];
+                    } else if (data.data.content) {
+                        currentScheme = data.data.content;
+                    } else {
+                        currentScheme = "";
+                    }
+                    renderScheme();
+                } else {
+                    showToast('生成失败: ' + (data.msg || '服务器错误'));
+                }
+            } catch (error) {
+                showToast('请求失败，请检查网络连接');
+                console.error(error);
+            } finally {
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('schemeContent').style.display = 'block';
+            }
         }
 
-        function showToast(message) {
-            const toast = document.getElementById("toast");
-            toast.textContent = message;
-            toast.classList.add("show");
-            setTimeout(() => toast.classList.remove("show"), 2000);
+        // 渲染方案
+        function renderScheme() {
+            const contentDiv = document.getElementById('schemeContent');
+
+            if (!currentScheme) {
+                contentDiv.innerHTML = `
+                    <div style="display: flex; align-items: center; justify-content: center; height: 400px; color: var(--text-hint);">
+                        生成失败，请重试
+                    </div>
+                `;
+                return;
+            }
+
+            contentDiv.innerHTML = `
+                <div class="scheme-header">
+                    <div class="scheme-label">AI 生成方案</div>
+                    <button class="favorite-btn" onclick="toggleFavorite()">
+                        ❤️
+                    </button>
+                </div>
+                <div class="script-content">${formatScriptContent(currentScheme)}</div>
+            `;
         }
-        
+
+        // 格式化脚本内容
+        function formatScriptContent(content) {
+            // 简单的格式化，确保内容正确显示
+            if (!content) return '<p>暂无内容</p>';
+            
+            // 确保内容被正确包裹
+            let formatted = content
+                .replace(/标题:/g, '<h4 class="script-title">标题:')
+                .replace(/配乐建议:/g, '<div class="music-suggestion">配乐建议:')
+                .replace(/镜头\d+:/g, '<div class="shot-item"><div class="shot-header">$&</div>')
+                .replace(/台词\d+:/g, '<div class="shot-dialogue">$&</div>');
+            
+            // 确保所有标签都正确关闭
+            formatted = formatted.replace(/(<h4[^>]*>.*?)(?=<h4|<div|$)/gs, '$1</h4>');
+            formatted = formatted.replace(/(<div class="music-suggestion">.*?)(?=<h4|<div|$)/gs, '$1</div>');
+            formatted = formatted.replace(/(<div class="shot-item">.*?)(?=<h4|<div class="shot-item"|<div class="music-suggestion"|$)/gs, '$1</div>');
+            
+            return formatted;
+        }
+
+        // 切换收藏状态
+        function toggleFavorite() {
+            if (!currentScheme) {
+                showToast('请先生成文案再收藏');
+                return;
+            }
+            
+            // 模拟收藏功能
+            const sceneCard = document.querySelector('.scene-card.active');
+            const scene = sceneCard ? sceneCard.dataset.value : '未知场景';
+            const style = document.getElementById('style').value;
+            const duration = document.getElementById('duration').value;
+            const keyInfo = document.getElementById('keyInfo').value.trim();
+            
+            // 保存到本地存储
+            const favoriteItem = {
+                scene: scene,
+                style: style,
+                duration: duration,
+                keyInfo: keyInfo,
+                content: currentScheme,
+                timestamp: new Date().toISOString()
+            };
+            
+            let favorites = JSON.parse(localStorage.getItem('ai_copywriter_favorites') || '[]');
+            favorites.push(favoriteItem);
+            localStorage.setItem('ai_copywriter_favorites', JSON.stringify(favorites));
+            
+            showToast('收藏成功');
+        }
+
+        // 显示昵称模态框
+        function showNicknameModal() {
+            document.getElementById('nicknameModal').classList.add('show');
+            document.getElementById('nicknameInput').value = userName;
+        }
+
+        // 关闭昵称模态框
+        function closeNicknameModal() {
+            document.getElementById('nicknameModal').classList.remove('show');
+        }
+
+        // 保存昵称
+        function saveNickname() {
+            const newName = document.getElementById('nicknameInput').value.trim();
+            if (newName) {
+                userName = newName;
+                localStorage.setItem('ai_copywriter_user_name', newName);
+                document.getElementById('userNameDisplay').textContent = newName;
+                closeNicknameModal();
+                showToast('昵称已更新');
+            }
+        }
+
         // 显示历史记录
         async function showHistory() {
-            const modal = document.getElementById("historyModal");
-            const historyList = document.getElementById("historyList");
-
-            modal.classList.add("show");
-
+            const modal = document.getElementById('historyModal');
+            modal.classList.add('show');
+            // 添加点击外部关闭功能
+            modal.onclick = function(e) {
+                if (e.target === modal) {
+                    closeHistoryModal();
+                }
+            };
             try {
                 const response = await fetch(`/api/scripts/history?user_id=${USER_ID}`);
                 const data = await response.json();
-                if (data.code === 200 && data.data && data.data.length > 0) {
-                    historyList.innerHTML = data.data.map((item, index) => `
-                        <div class="history-item" data-index="${index}">
-                            <div class="history-header">
-                                <span class="history-scene">${item.scene}</span>
-                                <span class="history-time">${item.create_time}</span>
+                if (data.code === 200) {
+                    const historyContent = document.getElementById('historyContent');
+                    if (data.data.length === 0) {
+                        historyContent.innerHTML = '<p style="text-align: center; color: var(--text-hint);">暂无历史记录</p>';
+                    } else {
+                        // 保存历史数据到全局变量
+                        window.historyData = data.data;
+                        historyContent.innerHTML = data.data.map((item, index) => `
+                            <div style="padding: 16px; border-bottom: 1px solid var(--border); word-wrap: break-word; overflow-wrap: break-word;">
+                                <div style="font-weight: 600; color: var(--primary); margin-bottom: 8px; word-wrap: break-word; overflow-wrap: break-word;">${item.scene}</div>
+                                <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 8px; word-wrap: break-word; overflow-wrap: break-word;">${item.key_info}</div>
+                                <div style="font-size: 12px; color: var(--text-hint); margin-bottom: 8px;">风格: ${item.style || '默认'} | 时长: ${item.duration || '默认'}</div>
+                                <div style="font-size: 12px; color: var(--text-hint);">生成时间: ${item.create_time}</div>
+                                <button style="margin-top: 12px; padding: 6px 12px; background: var(--primary); color: white; border: none; border-radius: 6px; font-size: 12px; cursor: pointer;" onclick="viewHistory(${index})">查看详情</button>
                             </div>
-                            <div class="history-info">
-                                ${item.key_info.length > 50 ? item.key_info.substring(0, 50) + '...' : item.key_info}
-                            </div>
-                            <div class="history-actions">
-                                <button class="history-btn history-btn-view" data-index="${index}">查看</button>
-                                <button class="history-btn history-btn-delete" onclick="deleteHistory('${item.id}')">删除</button>
-                            </div>
-                        </div>
-                    `).join('');
-                    
-                    setTimeout(() => {
-                        const viewBtns = historyList.querySelectorAll('.history-btn-view');
-                        viewBtns.forEach((btn, idx) => {
-                            btn.addEventListener('click', () => {
-                                viewHistory(data.data[idx]);
-                            });
-                        });
-                    }, 10);
-                } else {
-                    historyList.innerHTML = `<div class="empty-history">暂无历史记录</div>`;
+                        `).join('');
+                    }
                 }
-            } catch (e) {
-                historyList.innerHTML = `<div class="empty-history">获取历史记录失败</div>`;
-                console.error(e);
+            } catch (error) {
+                console.error(error);
             }
         }
 
-        // 查看历史记录
-        function viewHistory(item) {
-            closeHistory();
-            
-            // 获取所有方案
-            allSchemes = item.schemes || [item.content];
-            originalScript = allSchemes[0];
-            currentSchemeIndex = 0;
-            
-            // 保存到currentScriptInfo以便收藏功能正常工作
-            currentScriptInfo = {
-                scene: item.scene,
-                style: item.style,
-                duration: item.duration,
-                keyInfo: item.key_info,
-                schemes: allSchemes,
-                time: item.create_time
+        // 查看历史详情
+        function viewHistory(index) {
+            if (window.historyData && window.historyData[index]) {
+                const item = window.historyData[index];
+                currentScheme = item.content || (item.schemes && item.schemes[0]) || '';
+                renderScheme();
+                closeHistoryModal();
+            }
+        }
+
+        // 关闭历史记录模态框
+        function closeHistoryModal() {
+            document.getElementById('historyModal').classList.remove('show');
+        }
+
+        // 显示收藏
+        function showFavorites() {
+            const modal = document.getElementById('favoritesModal');
+            modal.classList.add('show');
+            modal.onclick = function(e) {
+                if (e.target === modal) {
+                    closeFavoritesModal();
+                }
             };
             
-            renderSchemes();
-        }
-
-        // 删除历史记录
-        async function deleteHistory(scriptId) {
-            if (!confirm('确定要删除这条记录吗？')) return;
-            try {
-                const response = await fetch(`/api/scripts/${scriptId}?user_id=${USER_ID}`, {
-                    method: 'DELETE'
-                });
-                const data = await response.json();
-                if (data.code === 200) {
-                    showHistory();
-                } else {
-                    alert('删除失败');
-                }
-            } catch (e) {
-                alert('删除失败');
-                console.error(e);
+            // 从本地存储获取收藏内容
+            let favorites = JSON.parse(localStorage.getItem('ai_copywriter_favorites') || '[]');
+            const favoritesContent = document.getElementById('favoritesContent');
+            
+            if (favorites.length === 0) {
+                favoritesContent.innerHTML = '<p style="text-align: center; color: var(--text-hint);">暂无收藏内容</p>';
+            } else {
+                favoritesContent.innerHTML = favorites.map((item, index) => `
+                    <div style="padding: 16px; border-bottom: 1px solid var(--border); word-wrap: break-word; overflow-wrap: break-word;">
+                        <div style="font-weight: 600; color: var(--primary); margin-bottom: 8px; word-wrap: break-word; overflow-wrap: break-word;">${item.scene}</div>
+                        <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 8px; word-wrap: break-word; overflow-wrap: break-word;">${item.keyInfo}</div>
+                        <div style="font-size: 12px; color: var(--text-hint); margin-bottom: 8px;">风格: ${item.style} | 时长: ${item.duration}</div>
+                        <div style="font-size: 12px; color: var(--text-hint);">收藏时间: ${new Date(item.timestamp).toLocaleString()}</div>
+                        <button style="margin-top: 12px; padding: 6px 12px; background: var(--primary); color: white; border: none; border-radius: 6px; font-size: 12px; cursor: pointer;" onclick="viewFavorite(${index})">查看详情</button>
+                    </div>
+                `).join('');
             }
         }
 
-        // 关闭历史记录（补充缺失的函数）
-        function closeHistory() {
-            const modal = document.getElementById("historyModal");
-            modal.classList.remove("show");
+        // 查看收藏详情
+        function viewFavorite(index) {
+            let favorites = JSON.parse(localStorage.getItem('ai_copywriter_favorites') || '[]');
+            if (favorites[index]) {
+                currentScheme = favorites[index].content;
+                renderScheme();
+                closeFavoritesModal();
+            }
         }
 
-        // 窗口大小变化时重新计算居中（适配响应式）
-        window.addEventListener('resize', updateSchemeDisplay);
+        // 关闭收藏模态框
+        function closeFavoritesModal() {
+            document.getElementById('favoritesModal').classList.remove('show');
+        }
+
+        // 显示提示消息
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // 导航功能
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function showFeatures() {
+            const modal = document.getElementById('featuresModal');
+            modal.classList.add('show');
+            modal.onclick = function(e) {
+                if (e.target === modal) {
+                    closeFeaturesModal();
+                }
+            };
+        }
+
+        function closeFeaturesModal() {
+            document.getElementById('featuresModal').classList.remove('show');
+        }
+
+        function showDocs() {
+            const modal = document.getElementById('docsModal');
+            modal.classList.add('show');
+            modal.onclick = function(e) {
+                if (e.target === modal) {
+                    closeDocsModal();
+                }
+            };
+        }
+
+        function closeDocsModal() {
+            document.getElementById('docsModal').classList.remove('show');
+        }
+
+        function showAbout() {
+            const modal = document.getElementById('aboutModal');
+            modal.classList.add('show');
+            modal.onclick = function(e) {
+                if (e.target === modal) {
+                    closeAboutModal();
+                }
+            };
+        }
+
+        function closeAboutModal() {
+            document.getElementById('aboutModal').classList.remove('show');
+        }
+
+        // 初始化
+        window.onload = init;
     </script>
 </body>
 </html>

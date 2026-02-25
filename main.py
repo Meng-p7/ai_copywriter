@@ -69,6 +69,17 @@ if not DEEPSEEK_API_KEY:
 # 初始化FastAPI应用
 app = FastAPI(title="AI文案脚本创作API", version="1.0")
 
+@app.post("/api/test_simple")
+def test_simple(req: dict):
+    return {
+        "code": 200,
+        "msg": "测试成功",
+        "data": {
+            "script_id": "test_123",
+            "schemes": ["测试方案1", "测试方案2", "测试方案3"]
+        }
+    }
+
 # ====================== 获取静态文件目录 ======================
 def get_static_dir():
     # 如果是打包后的，优先用 _MEIPASS（临时资源目录）
@@ -81,6 +92,12 @@ STATIC_DIR = get_static_dir()
 
 # 挂载静态文件（前端）
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+
+# 根路径重定向到静态文件
+@app.get("/")
+def read_root():
+    from fastapi.responses import RedirectResponse
+    return RedirectResponse(url="/static/index.html")
 
 # 配置CORS（允许跨域请求）
 app.add_middleware(
@@ -160,6 +177,17 @@ def get_db_conn():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"数据库连接失败：{str(e)}")
 
+# ====================== 语料库缓存（优化性能）======================
+corpus_cache = {}
+
+def get_cached_corpus(scene):
+    if scene in corpus_cache:
+        return corpus_cache[scene]
+    return None
+
+def set_cached_corpus(scene, content):
+    corpus_cache[scene] = content
+
 # DeepSeek API调用函数
 def call_deepseek_api(prompt):
     if not DEEPSEEK_API_KEY:
@@ -173,17 +201,21 @@ def call_deepseek_api(prompt):
     data = {
         "model": "deepseek-chat",
         "messages": [{"role": "user", "content": prompt}],
-        "temperature": 0.7,
-        "max_tokens": 2000,
+        "temperature": 1.3,
+        "max_tokens": 2500,
         "stream": False
     }
     
     try:
-        response = requests.post(url, headers=headers, json=data, timeout=30)
+        response = requests.post(url, headers=headers, json=data, timeout=60)
         response.raise_for_status()
         result = response.json()
         content = result["choices"][0]["message"]["content"].strip()
         return content
+    except requests.exceptions.Timeout:
+        raise HTTPException(status_code=500, detail="AI响应超时，请稍后重试")
+    except requests.exceptions.RequestException as e:
+        raise HTTPException(status_code=500, detail=f"AI请求失败：{str(e)}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"AI生成失败：{str(e)}")
 
@@ -205,8 +237,13 @@ class SaveScriptRequest(BaseModel):
     duration: str
     content: str
 
-# 新增：根据场景自动生成语料库的函数
+# 新增：根据场景自动生成语料库的函数（带缓存优化）
 def generate_corpus_by_scene(scene):
+    # 先检查缓存
+    cached = get_cached_corpus(scene)
+    if cached:
+        return cached
+    
     prompt = f"""
     请为{scene}创作场景生成一份专业的语料库，包含以下内容：
     1. 该场景常用的爆款词汇和表达（10-15个）
@@ -217,15 +254,18 @@ def generate_corpus_by_scene(scene):
     请直接输出内容，不要任何多余的格式。
     """
     try:
-        return call_deepseek_api(prompt)
+        content = call_deepseek_api(prompt)
+        # 缓存结果
+        set_cached_corpus(scene, content)
+        return content
     except:
         return ""
 
 # ------------------- 核心接口：生成文案/脚本 -------------------
 @app.post("/api/script/create", response_model=dict)
 def create_script(req: CreateScriptRequest):
-    # 1. 自动根据场景生成语料库
-    corpus_content = generate_corpus_by_scene(req.scene)
+    # 跳过语料库生成，直接使用简化提示
+    corpus_content = "口语化表达，情绪饱满"
     
     # 2. 按时长匹配镜头数量
     duration_map = {
@@ -243,60 +283,37 @@ def create_script(req: CreateScriptRequest):
         "煽情风": "语言温暖、有感染力，能触动情绪，镜头慢节奏，背景音乐舒缓，适合情感类内容"
     }.get(req.style, "语言口语化，有感染力，适合短视频拍摄")
     
-    # 4. 构造AI提示词（生成3种方案）
+    # 4. 构造AI提示词（生成1种高质量方案）
     prompt = f"""
-    你是专业的{req.scene}短视频脚本创作师，请生成3种不同风格的{req.duration}短视频文案方案供用户选择。
+    你是专业的{req.scene}短视频脚本创作师，请生成1种高质量的{req.duration}短视频文案方案。
     严格遵守以下所有规则，一条都不能违反：
 
     1. 必须包含核心信息：{req.key_info}
     2. 参考该场景的专业语料库：{corpus_content}
-    3. 时长要求：严格控制在{req.duration}，镜头数量为{shot_count}个，每个镜头台词长度匹配时长,但字数不能太少
+    3. 时长要求：严格控制在{req.duration}，镜头数量为{shot_count}个，每个镜头台词长度匹配时长,字数尽量多
     4. 严禁使用广告违禁词：最、第一、顶级、绝对、全网第一、永久等。
-    5. 输出格式：用===方案X===来分隔3种方案，每种方案的结构如下：
+    5. 输出格式：
 
-    ===方案1===
     标题: 这里写视频标题，一定要足够吸睛
     {"".join([f"镜头{i}: 镜头内容描述\n台词{i}: 台词内容（必须是博主说的话，不能空）\n\n" for i in range(1, shot_count+1)])}
     配乐建议: 统一的背景音乐风格描述（整个视频使用同一首音乐）
 
-    ===方案2===
-    标题: 这里写视频标题，换一种表达方式
-    {"".join([f"镜头{i}: 镜头内容描述\n台词{i}: 台词内容（必须是博主说的话，不能空）\n\n" for i in range(1, shot_count+1)])}
-    配乐建议: 统一的背景音乐风格描述
-
-    ===方案3===
-    标题: 这里写视频标题，第三种表达方式
-    {"".join([f"镜头{i}: 镜头内容描述\n台词{i}: 台词内容（必须是博主说的话，不能空）\n\n" for i in range(1, shot_count+1)])}
-    配乐建议: 统一的背景音乐风格描述
-
     要求：
-    - 3种方案要有明显的风格差异：方案1用{style_prompt}风格；方案2可以更直接有力；方案3可以更有创意或故事性
+    - 使用{style_prompt}风格
     - 镜头、台词的编号必须一一对应
     - 每一行只写一项，不要把多个内容写在同一行
     - 不要任何多余格式、表格、横线、星号、加粗符号
     - 台词必须是口语化的句子，不能省略
-    - 配乐建议只在每个方案的最后统一输出一次
-    - 严格用===方案X===来分隔，不要用其他分隔符
+    - 配乐建议只在方案的最后统一输出一次
     - 充分利用参考语料库中的爆款词汇和表达，让文案更符合该场景的特点
+    - 确保文案质量高，有吸引力，能够有效传达核心信息
     """
     
     # 5. 调用AI生成内容
     script_content = call_deepseek_api(prompt)
     
-    # 6. 解析3种方案
-    schemes = []
-    scheme_parts = script_content.split("===方案")
-    for i, part in enumerate(scheme_parts):
-        if i == 0:
-            continue
-        if "===" in part:
-            scheme_content = part.split("===")[1].strip()
-            if scheme_content:
-                schemes.append(scheme_content)
-    
-    # 如果解析失败，至少返回一个方案
-    if len(schemes) == 0:
-        schemes = [script_content]
+    # 6. 直接使用生成的内容作为单个方案
+    schemes = [script_content]
     
     # 7. 保存到数据库（保存所有方案）
     script_id = f"script_{uuid.uuid4().hex[:8]}"
@@ -312,7 +329,7 @@ def create_script(req: CreateScriptRequest):
     cursor.close()
     conn.close()
     
-    # 8. 返回结果（包含3种方案）
+    # 8. 返回结果
     return {
         "code": 200,
         "msg": "生成成功",
