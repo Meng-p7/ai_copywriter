@@ -5,7 +5,8 @@ from pydantic import BaseModel
 import requests
 import sqlite3
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
+from typing import Any, Dict, Optional
 import re
 import os
 import sys
@@ -52,6 +53,11 @@ DEEPSEEK_API_KEY = os.getenv('DEEPSEEK_API_KEY')
 HOST = os.getenv('HOST', '127.0.0.1')
 PORT = int(os.getenv('PORT', 8000))
 DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
+SEDANCE_API_URL = os.getenv('SEDANCE_API_URL', '').strip()
+SEDANCE_API_KEY = os.getenv('SEDANCE_API_KEY', '').strip()
+SEDANCE_TIMEOUT_SECONDS = int(os.getenv('SEDANCE_TIMEOUT_SECONDS', '120'))
+SEDANCE_MOCK_MODE = os.getenv('SEDANCE_MOCK_MODE', 'False').lower() == 'true'
+MEMBER_MONTHLY_PRICE = 9.9
 
 # ====================== 获取数据目录 ======================
 def get_data_dir():
@@ -68,6 +74,10 @@ if not DEEPSEEK_API_KEY:
 
 # 初始化FastAPI应用
 app = FastAPI(title="AI文案脚本创作API", version="1.0")
+
+VIDEO_MODELS = ("2.0", "1.8")
+VIDEO_LIMITS_FREE = {"2.0": 1, "1.8": 2}
+VIDEO_LIMITS_MEMBER = {"2.0": 10, "1.8": 25}
 
 @app.post("/api/test_simple")
 def test_simple(req: dict):
@@ -156,11 +166,37 @@ def init_db():
             update_time DATETIME NOT NULL
         )
     ''')
+
+    # 创建视频会员表
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS video_memberships (
+            user_id VARCHAR(64) PRIMARY KEY,
+            is_member INTEGER NOT NULL DEFAULT 0,
+            member_expire_at DATETIME,
+            create_time DATETIME NOT NULL,
+            update_time DATETIME NOT NULL
+        )
+    ''')
+
+    # 创建视频每日用量表
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS video_usage_daily (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id VARCHAR(64) NOT NULL,
+            usage_date DATE NOT NULL,
+            model VARCHAR(10) NOT NULL,
+            used_count INTEGER NOT NULL DEFAULT 0,
+            create_time DATETIME NOT NULL,
+            update_time DATETIME NOT NULL,
+            UNIQUE(user_id, usage_date, model)
+        )
+    ''')
     
     # 创建索引
     cursor.execute('CREATE INDEX IF NOT EXISTS idx_scripts_user ON scripts(user_id)')
     cursor.execute('CREATE INDEX IF NOT EXISTS idx_favorites_user ON favorites(user_id)')
     cursor.execute('CREATE INDEX IF NOT EXISTS idx_users_phone ON users(phone)')
+    cursor.execute('CREATE INDEX IF NOT EXISTS idx_video_usage_user_date ON video_usage_daily(user_id, usage_date)')
     
     conn.commit()
     conn.close()
@@ -236,6 +272,242 @@ class SaveScriptRequest(BaseModel):
     style: str
     duration: str
     content: str
+
+class VideoGenerateRequest(BaseModel):
+    user_id: str
+    model: str = "2.0"
+    digital_human: str = "default"
+    voice_style: str = "female"
+    script: str
+
+class VideoRechargeRequest(BaseModel):
+    user_id: str
+    months: int = 1
+
+def _now_str() -> str:
+    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+def _today_str() -> str:
+    return datetime.now().strftime("%Y-%m-%d")
+
+def _normalize_video_model(model: str) -> str:
+    normalized = str(model).strip().replace("sedance-", "").replace("seedance-", "")
+    if normalized in VIDEO_MODELS:
+        return normalized
+    raise HTTPException(status_code=400, detail=f"不支持的模型: {model}")
+
+def _parse_time(value: Optional[str]) -> Optional[datetime]:
+    if not value:
+        return None
+    for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%dT%H:%M:%S"):
+        try:
+            return datetime.strptime(value, fmt)
+        except ValueError:
+            continue
+    return None
+
+def _ensure_video_membership_row(conn: sqlite3.Connection, user_id: str) -> None:
+    now = _now_str()
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT OR IGNORE INTO video_memberships (user_id, is_member, member_expire_at, create_time, update_time) VALUES (?, 0, NULL, ?, ?)",
+        (user_id, now, now)
+    )
+    conn.commit()
+    cursor.close()
+
+def _get_membership_status(conn: sqlite3.Connection, user_id: str) -> Dict[str, Any]:
+    _ensure_video_membership_row(conn, user_id)
+
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT is_member, member_expire_at FROM video_memberships WHERE user_id = ?",
+        (user_id,)
+    )
+    row = cursor.fetchone()
+    cursor.close()
+
+    is_member = bool(row["is_member"]) if row else False
+    member_expire_at = row["member_expire_at"] if row else None
+
+    expire_dt = _parse_time(member_expire_at)
+    if is_member and expire_dt and expire_dt <= datetime.now():
+        now = _now_str()
+        cursor = conn.cursor()
+        cursor.execute(
+            "UPDATE video_memberships SET is_member = 0, member_expire_at = NULL, update_time = ? WHERE user_id = ?",
+            (now, user_id)
+        )
+        conn.commit()
+        cursor.close()
+        is_member = False
+        member_expire_at = None
+
+    return {
+        "is_member": is_member,
+        "member_expire_at": member_expire_at
+    }
+
+def _get_video_limits(is_member: bool) -> Dict[str, int]:
+    return VIDEO_LIMITS_MEMBER if is_member else VIDEO_LIMITS_FREE
+
+def _get_video_quota_snapshot(conn: sqlite3.Connection, user_id: str) -> Dict[str, Any]:
+    membership = _get_membership_status(conn, user_id)
+    limits = _get_video_limits(membership["is_member"])
+    today = _today_str()
+
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT model, used_count FROM video_usage_daily WHERE user_id = ? AND usage_date = ?",
+        (user_id, today)
+    )
+    rows = cursor.fetchall()
+    cursor.close()
+
+    used_map = {row["model"]: int(row["used_count"]) for row in rows}
+    models = {}
+    for model in VIDEO_MODELS:
+        used = used_map.get(model, 0)
+        limit = limits[model]
+        models[model] = {
+            "limit": limit,
+            "used": used,
+            "remaining": max(limit - used, 0)
+        }
+
+    return {
+        "user_id": user_id,
+        "usage_date": today,
+        "is_member": membership["is_member"],
+        "member_expire_at": membership["member_expire_at"],
+        "models": models
+    }
+
+def _consume_video_quota(conn: sqlite3.Connection, user_id: str, model: str) -> Dict[str, Any]:
+    normalized_model = _normalize_video_model(model)
+    current_quota = _get_video_quota_snapshot(conn, user_id)
+    model_quota = current_quota["models"].get(normalized_model)
+    if not model_quota:
+        raise HTTPException(status_code=400, detail=f"不支持的模型: {normalized_model}")
+    if model_quota["remaining"] <= 0:
+        raise HTTPException(status_code=400, detail=f"{normalized_model} 模型今日次数已用完，请升级会员或明天再试")
+
+    now = _now_str()
+    today = _today_str()
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        INSERT INTO video_usage_daily (user_id, usage_date, model, used_count, create_time, update_time)
+        VALUES (?, ?, ?, 1, ?, ?)
+        ON CONFLICT(user_id, usage_date, model)
+        DO UPDATE SET used_count = used_count + 1, update_time = excluded.update_time
+        """,
+        (user_id, today, normalized_model, now, now)
+    )
+    conn.commit()
+    cursor.close()
+    return _get_video_quota_snapshot(conn, user_id)
+
+def _activate_membership(conn: sqlite3.Connection, user_id: str, months: int = 1) -> Dict[str, Any]:
+    clamped_months = max(1, min(int(months), 24))
+    current = _get_membership_status(conn, user_id)
+
+    now_dt = datetime.now()
+    base_dt = now_dt
+    current_expire_dt = _parse_time(current.get("member_expire_at"))
+    if current_expire_dt and current_expire_dt > now_dt:
+        base_dt = current_expire_dt
+
+    expire_dt = base_dt + timedelta(days=30 * clamped_months)
+    expire_str = expire_dt.strftime("%Y-%m-%d %H:%M:%S")
+    now = _now_str()
+
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        INSERT INTO video_memberships (user_id, is_member, member_expire_at, create_time, update_time)
+        VALUES (?, 1, ?, ?, ?)
+        ON CONFLICT(user_id)
+        DO UPDATE SET is_member = 1, member_expire_at = excluded.member_expire_at, update_time = excluded.update_time
+        """,
+        (user_id, expire_str, now, now)
+    )
+    conn.commit()
+    cursor.close()
+
+    quota = _get_video_quota_snapshot(conn, user_id)
+    quota["recharge_months"] = clamped_months
+    quota["member_price"] = MEMBER_MONTHLY_PRICE
+    return quota
+
+def _extract_video_result_fields(api_data: Dict[str, Any]) -> Dict[str, Any]:
+    def read_path(data: Dict[str, Any], *keys: str) -> Any:
+        node: Any = data
+        for key in keys:
+            if not isinstance(node, dict) or key not in node:
+                return None
+            node = node[key]
+        return node
+
+    video_url = (
+        read_path(api_data, "video_url")
+        or read_path(api_data, "data", "video_url")
+        or read_path(api_data, "result", "video_url")
+        or read_path(api_data, "output", "video_url")
+    )
+    task_id = (
+        read_path(api_data, "task_id")
+        or read_path(api_data, "data", "task_id")
+        or read_path(api_data, "result", "task_id")
+        or read_path(api_data, "id")
+    )
+    return {"video_url": video_url, "task_id": task_id}
+
+def _call_sedance_api(req: VideoGenerateRequest) -> Dict[str, Any]:
+    if SEDANCE_MOCK_MODE:
+        return {
+            "task_id": f"mock_{uuid.uuid4().hex[:12]}",
+            "video_url": "https://example.com/mock-video.mp4",
+            "mock": True
+        }
+
+    if not SEDANCE_API_URL or not SEDANCE_API_KEY:
+        raise HTTPException(
+            status_code=500,
+            detail="未配置 SEDANCE_API_URL 或 SEDANCE_API_KEY，请先在 .env 中填写"
+        )
+
+    payload = {
+        "model": f"sedance-{_normalize_video_model(req.model)}",
+        "digital_human": req.digital_human,
+        "voice_style": req.voice_style,
+        "script": req.script
+    }
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {SEDANCE_API_KEY}"
+    }
+
+    try:
+        response = requests.post(
+            SEDANCE_API_URL,
+            headers=headers,
+            json=payload,
+            timeout=SEDANCE_TIMEOUT_SECONDS
+        )
+        response.raise_for_status()
+    except requests.exceptions.Timeout:
+        raise HTTPException(status_code=500, detail="Seedance 接口超时，请稍后重试")
+    except requests.exceptions.RequestException as e:
+        body = ""
+        if e.response is not None:
+            body = (e.response.text or "")[:200]
+        raise HTTPException(status_code=500, detail=f"Seedance 接口请求失败: {str(e)} {body}".strip())
+
+    try:
+        return response.json()
+    except ValueError:
+        raise HTTPException(status_code=500, detail="Seedance 接口返回了非 JSON 数据")
 
 # 新增：根据场景自动生成语料库的函数（带缓存优化）
 def generate_corpus_by_scene(scene):
@@ -390,49 +662,61 @@ def delete_script(script_id: str, user_id: str):
     conn.close()
     return {"code": 200, "msg": "删除成功"}
 
-# ------------------- 新增接口：生成数字人视频 -------------------
-@app.post("/api/video/generate")
-def generate_video(request: dict):
-    user_id = request.get('user_id')
-    model = request.get('model', '2.0')
-    digital_human = request.get('digital_human', 'default')
-    voice_style = request.get('voice_style', 'female')
-    script = request.get('script', '')
+# ------------------- 视频配额/会员/生成接口 -------------------
+@app.get("/api/video/quota")
+def get_video_quota(user_id: str):
+    conn = get_db_conn()
+    try:
+        quota = _get_video_quota_snapshot(conn, user_id)
+        return {"code": 200, "msg": "获取成功", "data": quota}
+    finally:
+        conn.close()
 
-    if not user_id or not script:
+@app.post("/api/video/recharge")
+def recharge_video_membership(req: VideoRechargeRequest):
+    conn = get_db_conn()
+    try:
+        quota = _activate_membership(conn, req.user_id, req.months)
+        return {
+            "code": 200,
+            "msg": "会员开通成功",
+            "data": quota
+        }
+    finally:
+        conn.close()
+
+@app.post("/api/video/generate")
+def generate_video(req: VideoGenerateRequest):
+    if not req.user_id or not req.script.strip():
         return {"code": 400, "msg": "参数不全"}
 
     try:
-        # 这里需要替换为实际的Sedance API调用
-        import requests
-        import json
+        normalized_model = _normalize_video_model(req.model)
+        req.model = normalized_model
+        api_result = _call_sedance_api(req)
 
-        # 示例：调用Sedance API
-        sedance_api_url = "https://api.sedance.com/v1/video/generate"
-        sedance_api_key = "YOUR_SEDANCE_API_KEY"  # 需要替换为实际的API Key
+        conn = get_db_conn()
+        try:
+            updated_quota = _consume_video_quota(conn, req.user_id, normalized_model)
+        finally:
+            conn.close()
 
-        payload = {
-            "model": f"sedance-{model}",
-            "digital_human": digital_human,
-            "voice_style": voice_style,
-            "script": script
-        }
-
-        headers = {
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {sedance_api_key}"
-        }
-
-        # 这里暂时返回模拟数据
+        result_fields = _extract_video_result_fields(api_result)
         return {
             "code": 200,
             "msg": "视频生成成功",
             "data": {
-                "video_url": "https://example.com/video.mp4",
-                "model": model,
-                "digital_human": digital_human
+                "model": normalized_model,
+                "digital_human": req.digital_human,
+                "voice_style": req.voice_style,
+                "video_url": result_fields.get("video_url"),
+                "task_id": result_fields.get("task_id"),
+                "raw_response": api_result,
+                "quota": updated_quota
             }
         }
+    except HTTPException as e:
+        return {"code": e.status_code, "msg": e.detail}
     except Exception as e:
         return {"code": 500, "msg": f"生成失败: {str(e)}"}
 

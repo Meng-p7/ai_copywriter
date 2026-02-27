@@ -4,766 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI拍 - 智能文案创作</title>
-    <style>
-        :root {
-            --primary: #1E40AF; /* 深蓝色主色 */
-            --primary-light: #EFF6FF; /* 浅蓝背景 */
-            --primary-dark: #1E3A8A; /* 深蓝hover */
-            --secondary: #F9FAFB; /* 浅灰背景 */
-            --accent: #3B82F6; /* 亮蓝色辅助 */
-            --text-main: #1F2937; /* 主文本 */
-            --text-secondary: #4B5563; /* 次文本 */
-            --text-hint: #9CA3AF; /* 提示文本 */
-            --border: #E5E7EB; /* 边框色 */
-            --success: #10B981; /* 成功色 */
-            --camera: #6366F1; /* 镜头色 */
-            --dialogue: #8B5CF6; /* 台词色 */
-            --music: #F59E0B; /* 音乐色 */
-            --radius: 16px; /* 统一圆角 */
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* 现代化阴影 */
-            --shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* 悬停阴影 */
-            --bg-gradient: linear-gradient(135deg, #FFFFFF 0%, #F9FAFB 100%); /* 现代背景 */
-            --primary-gradient: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%); /* 主色渐变 */
-            --glass-bg: rgba(255, 255, 255, 0.8); /* 玻璃拟态背景 */
-            --glass-border: rgba(255, 255, 255, 0.6); /* 玻璃拟态边框 */
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
-        }
-
-        body {
-            background: var(--bg-gradient);
-            margin: 0;
-            padding: 0;
-            color: var(--text-main);
-            min-height: 100vh;
-            position: relative;
-        }
-
-        /* 背景装饰元素 */
-        .bg-decoration {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 0;
-            overflow: hidden;
-        }
-
-        .circle {
-            position: absolute;
-            border-radius: 50%;
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(30, 64, 175, 0.04));
-            animation: float 20s ease-in-out infinite;
-        }
-
-        .circle-1 {
-            width: 400px;
-            height: 400px;
-            top: -100px;
-            right: -100px;
-            animation-delay: 0s;
-        }
-
-        .circle-2 {
-            width: 300px;
-            height: 300px;
-            bottom: -50px;
-            left: -50px;
-            animation-delay: -5s;
-        }
-
-        .circle-3 {
-            width: 200px;
-            height: 200px;
-            top: 40%;
-            right: 10%;
-            animation-delay: -10s;
-        }
-
-        .circle-4 {
-            width: 150px;
-            height: 150px;
-            top: 20%;
-            left: 5%;
-            animation-delay: -15s;
-        }
-
-        .circle-5 {
-            width: 250px;
-            height: 250px;
-            bottom: 20%;
-            right: 20%;
-            animation-delay: -8s;
-        }
-
-        @keyframes float {
-            0%, 100% {
-                transform: translateY(0) rotate(0deg);
-            }
-            25% {
-                transform: translateY(-20px) rotate(5deg);
-            }
-            50% {
-                transform: translateY(-40px) rotate(0deg);
-            }
-            75% {
-                transform: translateY(-20px) rotate(-5deg);
-            }
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 40px 20px;
-            position: relative;
-            z-index: 1;
-        }
-
-        /* 顶部导航 */
-        .nav-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 60px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .logo-icon {
-            width: 48px;
-            height: 48px;
-            background: var(--primary-gradient);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 24px;
-            font-weight: bold;
-        }
-
-        .logo-text {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--primary);
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 32px;
-            align-items: center;
-        }
-
-        .nav-link {
-            text-decoration: none;
-            color: var(--text-secondary);
-            font-weight: 500;
-            transition: color 0.3s ease;
-            font-size: 16px;
-        }
-
-        .nav-link:hover {
-            color: var(--primary);
-        }
-
-        .nav-link.active {
-            color: var(--primary);
-            font-weight: 600;
-        }
-
-        .user-section {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .user-name {
-            font-weight: 500;
-            color: var(--text-main);
-        }
-
-        .btn-edit {
-            background: none;
-            border: 1px solid var(--border);
-            padding: 8px 16px;
-            border-radius: 8px;
-            color: var(--text-secondary);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 14px;
-        }
-
-        .btn-edit:hover {
-            border-color: var(--primary);
-            color: var(--primary);
-        }
-
-        /* 英雄区域 */
-        .hero-section {
-            text-align: center;
-            margin-bottom: 60px;
-            animation: fadeInUp 0.8s ease-out;
-        }
-
-        .hero-title {
-            font-size: 48px;
-            font-weight: 700;
-            margin-bottom: 16px;
-            background: var(--primary-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .hero-subtitle {
-            font-size: 20px;
-            color: var(--text-secondary);
-            margin-bottom: 40px;
-            max-width: 800px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .hero-buttons {
-            display: flex;
-            gap: 16px;
-            justify-content: center;
-            margin-bottom: 40px;
-        }
-
-        .btn-primary {
-            background: var(--primary-gradient);
-            color: white;
-            border: none;
-            padding: 16px 32px;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: var(--shadow);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-hover);
-        }
-
-        .btn-secondary {
-            background: white;
-            color: var(--primary);
-            border: 1px solid var(--border);
-            padding: 16px 32px;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .btn-secondary:hover {
-            border-color: var(--primary);
-            box-shadow: var(--shadow);
-        }
-
-        /* 主要内容区域 */
-        .main-content {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 40px;
-            margin-bottom: 60px;
-        }
-
-        /* 左侧表单 */
-        .form-section {
-            background: var(--glass-bg);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-radius: var(--radius);
-            padding: 32px;
-            box-shadow: var(--shadow);
-            border: 1px solid var(--glass-border);
-        }
-
-        .form-header {
-            margin-bottom: 24px;
-        }
-
-        .form-title {
-            font-size: 24px;
-            font-weight: 600;
-            color: var(--primary);
-            margin-bottom: 8px;
-        }
-
-        .form-subtitle {
-            color: var(--text-secondary);
-            font-size: 14px;
-        }
-
-        .form-item {
-            margin-bottom: 24px;
-        }
-
-        .label {
-            display: block;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: var(--text-main);
-            font-size: 14px;
-        }
-
-        select, textarea, input {
-            width: 100%;
-            padding: 12px 16px;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            font-size: 16px;
-            color: var(--text-main);
-            background-color: white;
-            transition: all 0.3s ease;
-        }
-
-        select:focus, textarea:focus, input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-
-        textarea {
-            min-height: 120px;
-            resize: vertical;
-            line-height: 1.6;
-        }
-
-        /* 场景选择器 */
-        .scene-selector {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin-bottom: 24px;
-        }
-
-        .scene-card {
-            padding: 20px;
-            background: white;
-            border: 2px solid var(--border);
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: center;
-            font-size: 14px;
-            color: var(--text-main);
-            position: relative;
-        }
-
-        .scene-card:hover {
-            border-color: var(--primary);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow);
-        }
-
-        .scene-card.active {
-            border-color: var(--primary);
-            background: var(--primary-light);
-            color: var(--primary);
-            font-weight: 600;
-        }
-
-        .scene-icon {
-            font-size: 24px;
-            margin-bottom: 8px;
-            display: block;
-        }
-
-        .form-row {
-            display: flex;
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-
-        .form-row .form-item {
-            flex: 1;
-            margin-bottom: 0;
-        }
-
-        /* 生成按钮 */
-        .generate-btn {
-            width: 100%;
-            padding: 16px;
-            background: var(--primary-gradient);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: var(--shadow);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .generate-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-hover);
-        }
-
-        .generate-btn:disabled {
-            background: var(--border);
-            color: var(--text-hint);
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-
-        /* 右侧结果区域 */
-        .result-section {
-            background: var(--glass-bg);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-radius: var(--radius);
-            padding: 32px;
-            box-shadow: var(--shadow);
-            border: 1px solid var(--glass-border);
-            min-height: 600px;
-        }
-
-        .result-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .result-title {
-            font-size: 20px;
-            font-weight: 600;
-            color: var(--primary);
-        }
-
-        .result-actions {
-            display: flex;
-            gap: 12px;
-        }
-
-        .action-btn {
-            background: white;
-            border: 1px solid var(--border);
-            padding: 8px 16px;
-            border-radius: 8px;
-            color: var(--text-secondary);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 14px;
-        }
-
-        .action-btn:hover {
-            border-color: var(--primary);
-            color: var(--primary);
-        }
-
-        /* 方案显示容器 */
-        .scheme-container {
-            min-height: 400px;
-            margin-bottom: 24px;
-            background: white;
-            border-radius: 12px;
-            padding: 24px;
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border);
-        }
-
-        .scheme-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .scheme-label {
-            background: var(--primary-light);
-            color: var(--primary);
-            padding: 6px 16px;
-            border-radius: 16px;
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .favorite-btn {
-            background: none;
-            border: 1px solid var(--border);
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            transition: all 0.3s ease;
-        }
-
-        .favorite-btn:hover {
-            border-color: var(--primary);
-            color: var(--primary);
-        }
-
-        .favorite-btn.active {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-        }
-
-        .script-content {
-            line-height: 1.6;
-            color: var(--text-main);
-        }
-
-        .script-title {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 16px;
-            color: var(--text-main);
-        }
-
-        .shot-item {
-            margin-bottom: 16px;
-            padding: 12px;
-            background: var(--secondary);
-            border-radius: 8px;
-            border-left: 4px solid var(--camera);
-        }
-
-        .shot-header {
-            font-weight: 600;
-            color: var(--camera);
-            margin-bottom: 8px;
-        }
-
-        .shot-camera {
-            margin-bottom: 4px;
-            font-size: 14px;
-        }
-
-        .shot-dialogue {
-            margin-bottom: 4px;
-            font-size: 14px;
-            color: var(--dialogue);
-        }
-
-
-
-        /* 加载状态 */
-        .loading {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 400px;
-            color: var(--text-hint);
-        }
-
-        .loading-icon {
-            font-size: 48px;
-            margin-bottom: 16px;
-            animation: pulse 1.5s ease-in-out infinite;
-        }
-
-        .loading-text {
-            font-size: 16px;
-            margin-bottom: 8px;
-        }
-
-        .loading-dots {
-            display: flex;
-            gap: 4px;
-        }
-
-        .loading-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--primary);
-            animation: bounce 1.4s infinite ease-in-out both;
-        }
-
-        .loading-dot:nth-child(1) { animation-delay: -0.32s; }
-        .loading-dot:nth-child(2) { animation-delay: -0.16s; }
-
-        /* 动画效果 */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes pulse {
-            0%, 100% {
-                transform: scale(1);
-                opacity: 1;
-            }
-            50% {
-                transform: scale(1.1);
-                opacity: 0.8;
-            }
-        }
-
-        @keyframes bounce {
-            0%, 80%, 100% {
-                transform: scale(0);
-            }
-            40% {
-                transform: scale(1);
-            }
-        }
-
-        /* 响应式设计 */
-        @media (max-width: 768px) {
-            .container {
-                padding: 20px;
-            }
-
-            .nav-header {
-                flex-direction: column;
-                gap: 20px;
-                text-align: center;
-            }
-
-            .nav-links {
-                gap: 16px;
-            }
-
-            .hero-title {
-                font-size: 32px;
-            }
-
-            .hero-subtitle {
-                font-size: 16px;
-            }
-
-            .hero-buttons {
-                flex-direction: column;
-                align-items: center;
-            }
-
-            .main-content {
-                grid-template-columns: 1fr;
-                gap: 24px;
-            }
-
-            .scene-selector {
-                grid-template-columns: 1fr;
-            }
-
-            .form-row {
-                flex-direction: column;
-                gap: 24px;
-            }
-        }
-
-        /* 模态框 */
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .modal.show {
-            display: flex;
-        }
-
-        .modal-content {
-            background: white;
-            border-radius: 12px;
-            padding: 32px;
-            width: 90%;
-            max-width: 500px;
-            box-shadow: var(--shadow-hover);
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-        }
-
-        .modal-title {
-            font-size: 20px;
-            font-weight: 600;
-            color: var(--primary);
-        }
-
-        .modal-close {
-            background: none;
-            border: none;
-            font-size: 24px;
-            color: var(--text-hint);
-            cursor: pointer;
-        }
-
-        .modal-body {
-            margin-bottom: 24px;
-        }
-
-        .modal-footer {
-            display: flex;
-            gap: 12px;
-            justify-content: flex-end;
-        }
-
-        /* 提示消息 */
-        .toast {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--success);
-            color: white;
-            padding: 12px 24px;
-            border-radius: 8px;
-            box-shadow: var(--shadow);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            z-index: 1000;
-        }
-
-        .toast.show {
-            opacity: 1;
-        }
-    </style>
+    <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
     <!-- 背景装饰元素 -->
@@ -887,7 +128,7 @@
 
                 <!-- 方案显示容器 -->
                 <div class="scheme-container" id="schemeContainer">
-                    <div class="loading" id="loadingState" style="display: none;">
+                    <div class="loading is-hidden" id="loadingState">
                         <div class="loading-icon">🤖</div>
                         <div class="loading-text">AI 正在创作中...</div>
                         <div class="loading-dots">
@@ -897,7 +138,7 @@
                         </div>
                     </div>
                     <div id="schemeContent">
-                        <div style="display: flex; align-items: center; justify-content: center; height: 400px; color: var(--text-hint);">
+                        <div class="scheme-empty">
                             请选择创作场景并填写核心信息，点击生成文案按钮
                         </div>
                     </div>
@@ -925,12 +166,12 @@
 
     <!-- 历史记录模态框 -->
     <div class="modal" id="historyModal">
-        <div class="modal-content" style="max-height: 80vh;">
+        <div class="modal-content modal-content-scroll">
             <div class="modal-header">
                 <h3 class="modal-title">历史记录</h3>
                 <button class="modal-close" onclick="closeHistoryModal()">×</button>
             </div>
-            <div class="modal-body" id="historyContent" style="max-height: 60vh; overflow-y: auto;">
+            <div class="modal-body" id="historyContent">
                 <!-- 历史记录将在这里动态生成 -->
             </div>
             <div class="modal-footer">
@@ -941,12 +182,12 @@
 
     <!-- 收藏模态框 -->
     <div class="modal" id="favoritesModal">
-        <div class="modal-content" style="max-height: 80vh; overflow-y: auto;">
+        <div class="modal-content modal-content-scroll">
             <div class="modal-header">
                 <h3 class="modal-title">我的收藏</h3>
                 <button class="modal-close" onclick="closeFavoritesModal()">×</button>
             </div>
-            <div class="modal-body" id="favoritesContent" style="max-height: 60vh; overflow-y: auto;">
+            <div class="modal-body" id="favoritesContent">
                 <!-- 收藏内容将在这里动态生成 -->
             </div>
             <div class="modal-footer">
@@ -957,27 +198,27 @@
 
     <!-- 功能页面模态框 -->
     <div class="modal" id="featuresModal">
-        <div class="modal-content" style="max-width: 800px;">
+        <div class="modal-content modal-content-wide">
             <div class="modal-header">
                 <h3 class="modal-title">功能介绍</h3>
                 <button class="modal-close" onclick="closeFeaturesModal()">×</button>
             </div>
             <div class="modal-body">
-                <div style="padding: 20px;">
-                    <h4 style="color: var(--primary); margin-bottom: 16px; font-size: 18px;">AI 文案生成</h4>
-                    <p style="margin-bottom: 16px; color: var(--text-secondary);">基于先进的 AI 技术，为您生成高质量的短视频脚本和营销文案，支持多种创作场景和风格。</p>
+                <div class="modal-panel">
+                    <h4 class="info-title">AI 文案生成</h4>
+                    <p class="info-text">基于先进的 AI 技术，为您生成高质量的短视频脚本和营销文案，支持多种创作场景和风格。</p>
                     
-                    <h4 style="color: var(--primary); margin-bottom: 16px; font-size: 18px;">多场景支持</h4>
-                    <p style="margin-bottom: 16px; color: var(--text-secondary);">支持餐饮探店、美业美甲、跨境电商、知识讲解等多种创作场景，满足不同行业的需求。</p>
+                    <h4 class="info-title">多场景支持</h4>
+                    <p class="info-text">支持餐饮探店、美业美甲、跨境电商、知识讲解等多种创作场景，满足不同行业的需求。</p>
                     
-                    <h4 style="color: var(--primary); margin-bottom: 16px; font-size: 18px;">个性化定制</h4>
-                    <p style="margin-bottom: 16px; color: var(--text-secondary);">可根据您的需求选择不同的创作风格和视频时长，生成符合您期望的文案内容。</p>
+                    <h4 class="info-title">个性化定制</h4>
+                    <p class="info-text">可根据您的需求选择不同的创作风格和视频时长，生成符合您期望的文案内容。</p>
                     
-                    <h4 style="color: var(--primary); margin-bottom: 16px; font-size: 18px;">历史记录</h4>
-                    <p style="margin-bottom: 16px; color: var(--text-secondary);">自动保存您的创作历史，方便您随时查看和管理过去的创作内容。</p>
+                    <h4 class="info-title">历史记录</h4>
+                    <p class="info-text">自动保存您的创作历史，方便您随时查看和管理过去的创作内容。</p>
                     
-                    <h4 style="color: var(--primary); margin-bottom: 16px; font-size: 18px;">收藏功能</h4>
-                    <p style="margin-bottom: 16px; color: var(--text-secondary);">收藏您喜欢的文案方案，方便后续查看和使用。</p>
+                    <h4 class="info-title">收藏功能</h4>
+                    <p class="info-text">收藏您喜欢的文案方案，方便后续查看和使用。</p>
                 </div>
             </div>
             <div class="modal-footer">
@@ -988,38 +229,38 @@
 
     <!-- 文档页面模态框 -->
     <div class="modal" id="docsModal">
-        <div class="modal-content" style="max-width: 800px; max-height: 80vh;">
+        <div class="modal-content modal-content-scroll modal-content-wide">
             <div class="modal-header">
                 <h3 class="modal-title">使用文档</h3>
                 <button class="modal-close" onclick="closeDocsModal()">×</button>
             </div>
-            <div class="modal-body" style="max-height: 60vh; overflow-y: auto;">
-                <div style="padding: 20px;">
-                    <h4 style="color: var(--primary); margin-bottom: 16px; font-size: 18px;">快速开始</h4>
-                    <ol style="margin-bottom: 24px; color: var(--text-secondary); padding-left: 20px;">
-                        <li style="margin-bottom: 8px;">选择创作场景（如餐饮探店、美业美甲等）</li>
-                        <li style="margin-bottom: 8px;">选择创作风格和视频时长</li>
-                        <li style="margin-bottom: 8px;">填写核心信息，描述您的产品或服务特点</li>
-                        <li style="margin-bottom: 8px;">点击"生成文案"按钮</li>
-                        <li style="margin-bottom: 8px;">查看生成的文案方案</li>
+            <div class="modal-body">
+                <div class="modal-panel">
+                    <h4 class="info-title">快速开始</h4>
+                    <ol class="info-list">
+                        <li class="info-list-item">选择创作场景（如餐饮探店、美业美甲等）</li>
+                        <li class="info-list-item">选择创作风格和视频时长</li>
+                        <li class="info-list-item">填写核心信息，描述您的产品或服务特点</li>
+                        <li class="info-list-item">点击"生成文案"按钮</li>
+                        <li class="info-list-item">查看生成的文案方案</li>
                     </ol>
                     
-                    <h4 style="color: var(--primary); margin-bottom: 16px; font-size: 18px;">创作场景说明</h4>
-                    <ul style="margin-bottom: 24px; color: var(--text-secondary); padding-left: 20px;">
-                        <li style="margin-bottom: 8px;"><strong>餐饮探店</strong>：适用于餐厅、咖啡店、美食推荐等场景</li>
-                        <li style="margin-bottom: 8px;"><strong>美业美甲</strong>：适用于美容院、美甲店、美发店等场景</li>
-                        <li style="margin-bottom: 8px;"><strong>跨境电商</strong>：适用于海外购物、跨境商品推广等场景</li>
-                        <li style="margin-bottom: 8px;"><strong>知识讲解</strong>：适用于在线课程、知识产品推广等场景</li>
-                        <li style="margin-bottom: 8px;"><strong>生活团购</strong>：适用于本地生活团购、团购活动等场景</li>
-                        <li style="margin-bottom: 8px;"><strong>文旅宣传</strong>：适用于文旅宣传、旅游推荐等场景</li>
+                    <h4 class="info-title">创作场景说明</h4>
+                    <ul class="info-list">
+                        <li class="info-list-item"><strong>餐饮探店</strong>：适用于餐厅、咖啡店、美食推荐等场景</li>
+                        <li class="info-list-item"><strong>美业美甲</strong>：适用于美容院、美甲店、美发店等场景</li>
+                        <li class="info-list-item"><strong>跨境电商</strong>：适用于海外购物、跨境商品推广等场景</li>
+                        <li class="info-list-item"><strong>知识讲解</strong>：适用于在线课程、知识产品推广等场景</li>
+                        <li class="info-list-item"><strong>生活团购</strong>：适用于本地生活团购、团购活动等场景</li>
+                        <li class="info-list-item"><strong>文旅宣传</strong>：适用于文旅宣传、旅游推荐等场景</li>
                     </ul>
                     
-                    <h4 style="color: var(--primary); margin-bottom: 16px; font-size: 18px;">创作风格说明</h4>
-                    <ul style="margin-bottom: 24px; color: var(--text-secondary); padding-left: 20px;">
-                        <li style="margin-bottom: 8px;"><strong>口语化</strong>：语言自然，像日常对话一样</li>
-                        <li style="margin-bottom: 8px;"><strong>专业化</strong>：语言正式，突出专业知识和数据</li>
-                        <li style="margin-bottom: 8px;"><strong>搞笑风</strong>：语言幽默，引人发笑</li>
-                        <li style="margin-bottom: 8px;"><strong>煽情风</strong>：语言感性，打动人心</li>
+                    <h4 class="info-title">创作风格说明</h4>
+                    <ul class="info-list">
+                        <li class="info-list-item"><strong>口语化</strong>：语言自然，像日常对话一样</li>
+                        <li class="info-list-item"><strong>专业化</strong>：语言正式，突出专业知识和数据</li>
+                        <li class="info-list-item"><strong>搞笑风</strong>：语言幽默，引人发笑</li>
+                        <li class="info-list-item"><strong>煽情风</strong>：语言感性，打动人心</li>
                     </ul>
                 </div>
             </div>
@@ -1031,22 +272,22 @@
 
     <!-- 关于页面模态框 -->
     <div class="modal" id="aboutModal">
-        <div class="modal-content" style="max-width: 600px;">
+        <div class="modal-content modal-content-medium">
             <div class="modal-header">
                 <h3 class="modal-title">关于 AI 拍</h3>
                 <button class="modal-close" onclick="closeAboutModal()">×</button>
             </div>
             <div class="modal-body">
-                <div style="padding: 20px; text-align: center;">
-                    <div style="width: 80px; height: 80px; background: var(--primary-gradient); border-radius: 20px; display: flex; align-items: center; justify-content: center; color: white; font-size: 32px; font-weight: bold; margin: 0 auto 24px;">AI</div>
-                    <h4 style="color: var(--primary); margin-bottom: 16px; font-size: 24px;">AI 拍</h4>
-                    <p style="margin-bottom: 24px; color: var(--text-secondary);">AI 驱动的智能文案创作工具，为您提供高质量的短视频脚本和营销文案。</p>
-                    <div style="margin-bottom: 24px; color: var(--text-secondary);">
-                        <p style="margin-bottom: 8px;">版本：1.1.0</p>
-                        <p style="margin-bottom: 8px;">开发者：Dream工作室</p>
-                        <p style="margin-bottom: 8px;">联系邮箱：1685920009@qq.com</p>
+                <div class="about-panel">
+                    <div class="about-logo">AI</div>
+                    <h4 class="about-name">AI 拍</h4>
+                    <p class="about-desc">AI 驱动的智能文案创作工具，为您提供高质量的短视频脚本和营销文案。</p>
+                    <div class="about-meta">
+                        <p>版本：1.1.0</p>
+                        <p>开发者：Dream工作室</p>
+                        <p>联系邮箱：1685920009@qq.com</p>
                     </div>
-                    <p style="color: var(--text-hint); font-size: 14px;">© 2026 AI 拍. 保留所有权利.</p>
+                    <p class="about-copyright">© 2026 AI 拍. 保留所有权利.</p>
                 </div>
             </div>
             <div class="modal-footer">
@@ -1057,13 +298,13 @@
 
     <!-- 视频生成模态框 -->
     <div class="modal" id="videoModal">
-        <div class="modal-content" style="max-width: 600px;">
+        <div class="modal-content modal-content-medium">
             <div class="modal-header">
                 <h3 class="modal-title">🎬 生成数字人视频</h3>
                 <button class="modal-close" onclick="closeVideoModal()">×</button>
             </div>
             <div class="modal-body">
-                <div style="padding: 20px;">
+                <div class="modal-panel">
                     <div class="form-item">
                         <label class="label">选择模型</label>
                         <select id="videoModel">
@@ -1089,42 +330,43 @@
                             <option value="child">童声</option>
                         </select>
                     </div>
-                    <div style="margin-top: 20px; padding: 16px; background: var(--primary-light); border-radius: 8px;">
-                        <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 8px;">📊 今日使用次数：</p>
-                        <p style="color: var(--primary); font-weight: 600;">Seedance 2.0：0/1次 | Seedance 1.8：0/2次</p>
+                    <div class="usage-box">
+                        <p class="usage-label">📊 今日使用次数：</p>
+                        <p class="usage-value" id="videoUsageText">Seedance 2.0：0/1次 | Seedance 1.8：0/2次</p>
+                        <p class="usage-member" id="videoMemberText">会员状态：普通用户</p>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button class="btn-secondary" onclick="closeVideoModal()">取消</button>
-                <button class="btn-primary" onclick="generateVideo()">生成视频</button>
+                <button class="btn-primary" id="generateVideoBtn" onclick="generateVideo()">生成视频</button>
             </div>
         </div>
     </div>
 
     <!-- 充值模态框 -->
     <div class="modal" id="rechargeModal">
-        <div class="modal-content" style="max-width: 500px;">
+        <div class="modal-content">
             <div class="modal-header">
                 <h3 class="modal-title">💎 开通会员</h3>
                 <button class="modal-close" onclick="closeRechargeModal()">×</button>
             </div>
             <div class="modal-body">
-                <div style="padding: 20px; text-align: center;">
-                    <div style="width: 120px; height: 120px; background: var(--primary-gradient); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 48px; margin: 0 auto 24px;">
+                <div class="recharge-panel">
+                    <div class="recharge-icon">
                         ✨
                     </div>
-                    <h4 style="color: var(--primary); margin-bottom: 16px; font-size: 24px;">会员特权</h4>
-                    <div style="margin-bottom: 24px;">
-                        <p style="font-size: 20px; font-weight: 600; color: var(--primary); margin-bottom: 12px;">9.9元/月</p>
-                        <div style="text-align: left; padding: 20px; background: var(--secondary); border-radius: 8px;">
-                            <p style="margin-bottom: 8px; color: var(--text-secondary);">✅ 10次 Sedance 2.0 使用次数</p>
-                            <p style="margin-bottom: 8px; color: var(--text-secondary);">✅ 25次 Sedance 1.8 使用次数</p>
-                            <p style="margin-bottom: 8px; color: var(--text-secondary);">✅ 无广告体验</p>
-                            <p style="margin-bottom: 8px; color: var(--text-secondary);">✅ 优先使用新功能</p>
+                    <h4 class="recharge-title">会员特权</h4>
+                    <div class="recharge-content">
+                        <p class="recharge-price">9.9元/月</p>
+                        <div class="recharge-benefits">
+                            <p class="recharge-benefit">✅ 10次 Sedance 2.0 使用次数</p>
+                            <p class="recharge-benefit">✅ 25次 Sedance 1.8 使用次数</p>
+                            <p class="recharge-benefit">✅ 无广告体验</p>
+                            <p class="recharge-benefit">✅ 优先使用新功能</p>
                         </div>
                     </div>
-                    <button class="btn-primary" onclick="processRecharge()" style="width: 100%; padding: 16px; font-size: 16px;">
+                    <button class="btn-primary recharge-btn" onclick="processRecharge()">
                         💳 立即开通
                     </button>
                 </div>
@@ -1134,485 +376,9 @@
 
     <!-- 提示消息 -->
     <div class="toast" id="toast"></div>
-
-    <script>
-        // 全局变量
-        let currentScheme = "";
-        let USER_ID = "local_user_fixed_id_2026";
-        let userName = "创作者";
-        let currentGenerateParams = null;
-
-        // 初始化
-        function init() {
-            initUser();
-            initSceneSelector();
-            setupInputListeners();
-        }
-
-        // 初始化用户信息
-        function initUser() {
-            const savedUserName = localStorage.getItem('ai_copywriter_user_name');
-            if (savedUserName) {
-                userName = savedUserName;
-                document.getElementById('userNameDisplay').textContent = userName;
-            }
-        }
-
-        // 初始化场景选择器
-        function initSceneSelector() {
-            const sceneCards = document.querySelectorAll('.scene-card');
-            sceneCards.forEach(card => {
-                card.addEventListener('click', function() {
-                    sceneCards.forEach(c => c.classList.remove('active'));
-                    this.classList.add('active');
-                    resetGenerateButton();
-                });
-            });
-            // 默认选择第一个
-            if (sceneCards.length > 0) {
-                sceneCards[0].classList.add('active');
-            }
-        }
-
-        // 重置生成按钮文字
-        function resetGenerateButton() {
-            const generateBtn = document.getElementById('generateBtn');
-            generateBtn.innerHTML = '🤖 生成文案';
-        }
-
-        // 监听输入变化，重置按钮文字
-        function setupInputListeners() {
-            document.getElementById('style').addEventListener('change', resetGenerateButton);
-            document.getElementById('duration').addEventListener('change', resetGenerateButton);
-            document.getElementById('keyInfo').addEventListener('input', resetGenerateButton);
-        }
-
-        // 滚动到表单
-        function scrollToForm() {
-            document.querySelector('.form-section').scrollIntoView({ behavior: 'smooth' });
-        }
-
-        // 生成文案
-        async function generateScript() {
-            const sceneCard = document.querySelector('.scene-card.active');
-            if (!sceneCard) {
-                showToast('请选择创作场景');
-                return;
-            }
-
-            const scene = sceneCard.dataset.value;
-            const style = document.getElementById('style').value;
-            const duration = document.getElementById('duration').value;
-            const keyInfo = document.getElementById('keyInfo').value.trim();
-
-            if (!keyInfo) {
-                showToast('请填写核心信息');
-                return;
-            }
-
-            // 保存当前生成参数，用于再次生成
-            currentGenerateParams = {
-                user_id: USER_ID,
-                scene: scene,
-                style: style,
-                duration: duration,
-                key_info: keyInfo
-            };
-
-            // 显示加载状态
-            document.getElementById('loadingState').style.display = 'flex';
-            document.getElementById('schemeContent').style.display = 'none';
-
-            // 修改按钮文字
-            const generateBtn = document.getElementById('generateBtn');
-            generateBtn.innerHTML = '🤖 不满意？点击再次生成';
-
-            try {
-                const response = await fetch('/api/script/create', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(currentGenerateParams)
-                });
-
-                const data = await response.json();
-                if (data.code === 200) {
-                    // 只取第一个方案
-                    if (data.data.schemes && data.data.schemes.length > 0) {
-                        currentScheme = data.data.schemes[0];
-                    } else if (data.data.content) {
-                        currentScheme = data.data.content;
-                    } else {
-                        currentScheme = "";
-                    }
-                    renderScheme();
-                } else {
-                    showToast('生成失败: ' + (data.msg || '服务器错误'));
-                }
-            } catch (error) {
-                showToast('请求失败，请检查网络连接');
-                console.error(error);
-            } finally {
-                document.getElementById('loadingState').style.display = 'none';
-                document.getElementById('schemeContent').style.display = 'block';
-            }
-        }
-
-        // 渲染方案
-        function renderScheme() {
-            const contentDiv = document.getElementById('schemeContent');
-
-            if (!currentScheme) {
-                contentDiv.innerHTML = `
-                    <div style="display: flex; align-items: center; justify-content: center; height: 400px; color: var(--text-hint);">
-                        生成失败，请重试
-                    </div>
-                `;
-                return;
-            }
-
-            contentDiv.innerHTML = `
-                <div class="scheme-header">
-                    <div class="scheme-label">AI 生成方案</div>
-                    <button class="favorite-btn" onclick="toggleFavorite()">
-                        ❤️
-                    </button>
-                </div>
-                <div class="script-content">${formatScriptContent(currentScheme)}</div>
-            `;
-        }
-
-        // 格式化脚本内容
-        function formatScriptContent(content) {
-            // 简单的格式化，确保内容正确显示
-            if (!content) return '<p>暂无内容</p>';
-            
-            // 确保内容被正确包裹
-            let formatted = content
-                .replace(/标题:/g, '<h4 class="script-title">标题:')
-                .replace(/配乐建议:/g, '<div class="music-suggestion">配乐建议:')
-                .replace(/镜头\d+:/g, '<div class="shot-item"><div class="shot-header">$&</div>')
-                .replace(/台词\d+:/g, '<div class="shot-dialogue">$&</div>');
-            
-            // 确保所有标签都正确关闭
-            formatted = formatted.replace(/(<h4[^>]*>.*?)(?=<h4|<div|$)/gs, '$1</h4>');
-            formatted = formatted.replace(/(<div class="music-suggestion">.*?)(?=<h4|<div|$)/gs, '$1</div>');
-            formatted = formatted.replace(/(<div class="shot-item">.*?)(?=<h4|<div class="shot-item"|<div class="music-suggestion"|$)/gs, '$1</div>');
-            
-            return formatted;
-        }
-
-        // 切换收藏状态
-        function toggleFavorite() {
-            if (!currentScheme) {
-                showToast('请先生成文案再收藏');
-                return;
-            }
-            
-            // 模拟收藏功能
-            const sceneCard = document.querySelector('.scene-card.active');
-            const scene = sceneCard ? sceneCard.dataset.value : '未知场景';
-            const style = document.getElementById('style').value;
-            const duration = document.getElementById('duration').value;
-            const keyInfo = document.getElementById('keyInfo').value.trim();
-            
-            // 保存到本地存储
-            const favoriteItem = {
-                scene: scene,
-                style: style,
-                duration: duration,
-                keyInfo: keyInfo,
-                content: currentScheme,
-                timestamp: new Date().toISOString()
-            };
-            
-            let favorites = JSON.parse(localStorage.getItem('ai_copywriter_favorites') || '[]');
-            favorites.push(favoriteItem);
-            localStorage.setItem('ai_copywriter_favorites', JSON.stringify(favorites));
-            
-            showToast('收藏成功');
-        }
-
-        // 显示昵称模态框
-        function showNicknameModal() {
-            document.getElementById('nicknameModal').classList.add('show');
-            document.getElementById('nicknameInput').value = userName;
-        }
-
-        // 关闭昵称模态框
-        function closeNicknameModal() {
-            document.getElementById('nicknameModal').classList.remove('show');
-        }
-
-        // 保存昵称
-        function saveNickname() {
-            const newName = document.getElementById('nicknameInput').value.trim();
-            if (newName) {
-                userName = newName;
-                localStorage.setItem('ai_copywriter_user_name', newName);
-                document.getElementById('userNameDisplay').textContent = newName;
-                closeNicknameModal();
-                showToast('昵称已更新');
-            }
-        }
-
-        // 显示历史记录
-        async function showHistory() {
-            const modal = document.getElementById('historyModal');
-            modal.classList.add('show');
-            // 添加点击外部关闭功能
-            modal.onclick = function(e) {
-                if (e.target === modal) {
-                    closeHistoryModal();
-                }
-            };
-            try {
-                const response = await fetch(`/api/scripts/history?user_id=${USER_ID}`);
-                const data = await response.json();
-                if (data.code === 200) {
-                    const historyContent = document.getElementById('historyContent');
-                    if (data.data.length === 0) {
-                        historyContent.innerHTML = '<p style="text-align: center; color: var(--text-hint);">暂无历史记录</p>';
-                    } else {
-                        // 保存历史数据到全局变量
-                        window.historyData = data.data;
-                        historyContent.innerHTML = data.data.map((item, index) => `
-                            <div style="padding: 16px; border-bottom: 1px solid var(--border); word-wrap: break-word; overflow-wrap: break-word;">
-                                <div style="font-weight: 600; color: var(--primary); margin-bottom: 8px; word-wrap: break-word; overflow-wrap: break-word;">${item.scene}</div>
-                                <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 8px; word-wrap: break-word; overflow-wrap: break-word;">${item.key_info}</div>
-                                <div style="font-size: 12px; color: var(--text-hint); margin-bottom: 8px;">风格: ${item.style || '默认'} | 时长: ${item.duration || '默认'}</div>
-                                <div style="font-size: 12px; color: var(--text-hint);">生成时间: ${item.create_time}</div>
-                                <button style="margin-top: 12px; padding: 6px 12px; background: var(--primary); color: white; border: none; border-radius: 6px; font-size: 12px; cursor: pointer;" onclick="viewHistory(${index})">查看详情</button>
-                            </div>
-                        `).join('');
-                    }
-                }
-            } catch (error) {
-                console.error(error);
-            }
-        }
-
-        // 查看历史详情
-        function viewHistory(index) {
-            if (window.historyData && window.historyData[index]) {
-                const item = window.historyData[index];
-                currentScheme = item.content || (item.schemes && item.schemes[0]) || '';
-                renderScheme();
-                closeHistoryModal();
-            }
-        }
-
-        // 关闭历史记录模态框
-        function closeHistoryModal() {
-            document.getElementById('historyModal').classList.remove('show');
-        }
-
-        // 显示收藏
-        function showFavorites() {
-            const modal = document.getElementById('favoritesModal');
-            modal.classList.add('show');
-            modal.onclick = function(e) {
-                if (e.target === modal) {
-                    closeFavoritesModal();
-                }
-            };
-            
-            // 从本地存储获取收藏内容
-            let favorites = JSON.parse(localStorage.getItem('ai_copywriter_favorites') || '[]');
-            const favoritesContent = document.getElementById('favoritesContent');
-            
-            if (favorites.length === 0) {
-                favoritesContent.innerHTML = '<p style="text-align: center; color: var(--text-hint);">暂无收藏内容</p>';
-            } else {
-                favoritesContent.innerHTML = favorites.map((item, index) => `
-                    <div style="padding: 16px; border-bottom: 1px solid var(--border); word-wrap: break-word; overflow-wrap: break-word;">
-                        <div style="font-weight: 600; color: var(--primary); margin-bottom: 8px; word-wrap: break-word; overflow-wrap: break-word;">${item.scene}</div>
-                        <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 8px; word-wrap: break-word; overflow-wrap: break-word;">${item.keyInfo}</div>
-                        <div style="font-size: 12px; color: var(--text-hint); margin-bottom: 8px;">风格: ${item.style} | 时长: ${item.duration}</div>
-                        <div style="font-size: 12px; color: var(--text-hint);">收藏时间: ${new Date(item.timestamp).toLocaleString()}</div>
-                        <button style="margin-top: 12px; padding: 6px 12px; background: var(--primary); color: white; border: none; border-radius: 6px; font-size: 12px; cursor: pointer;" onclick="viewFavorite(${index})">查看详情</button>
-                    </div>
-                `).join('');
-            }
-        }
-
-        // 查看收藏详情
-        function viewFavorite(index) {
-            let favorites = JSON.parse(localStorage.getItem('ai_copywriter_favorites') || '[]');
-            if (favorites[index]) {
-                currentScheme = favorites[index].content;
-                renderScheme();
-                closeFavoritesModal();
-            }
-        }
-
-        // 关闭收藏模态框
-        function closeFavoritesModal() {
-            document.getElementById('favoritesModal').classList.remove('show');
-        }
-
-        // 显示提示消息
-        function showToast(message) {
-            const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.classList.add('show');
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
-        }
-
-        // 导航功能
-        function scrollToTop() {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function showFeatures() {
-            const modal = document.getElementById('featuresModal');
-            modal.classList.add('show');
-            modal.onclick = function(e) {
-                if (e.target === modal) {
-                    closeFeaturesModal();
-                }
-            };
-        }
-
-        function closeFeaturesModal() {
-            document.getElementById('featuresModal').classList.remove('show');
-        }
-
-        function showDocs() {
-            const modal = document.getElementById('docsModal');
-            modal.classList.add('show');
-            modal.onclick = function(e) {
-                if (e.target === modal) {
-                    closeDocsModal();
-                }
-            };
-        }
-
-        function closeDocsModal() {
-            document.getElementById('docsModal').classList.remove('show');
-        }
-
-        function showAbout() {
-            const modal = document.getElementById('aboutModal');
-            modal.classList.add('show');
-            modal.onclick = function(e) {
-                if (e.target === modal) {
-                    closeAboutModal();
-                }
-            };
-        }
-
-        function closeAboutModal() {
-            document.getElementById('aboutModal').classList.remove('show');
-        }
-
-        // 视频生成功能
-        function showVideoModal() {
-            if (!currentScheme) {
-                showToast('请先生成文案再生成视频');
-                return;
-            }
-            const modal = document.getElementById('videoModal');
-            modal.classList.add('show');
-            modal.onclick = function(e) {
-                if (e.target === modal) {
-                    closeVideoModal();
-                }
-            };
-        }
-
-        function showRechargeModal() {
-            const modal = document.getElementById('rechargeModal');
-            modal.classList.add('show');
-            modal.onclick = function(e) {
-                if (e.target === modal) {
-                    closeRechargeModal();
-                }
-            };
-        }
-
-        function closeRechargeModal() {
-            document.getElementById('rechargeModal').classList.remove('show');
-        }
-
-        function processRecharge() {
-            showToast('正在跳转到支付页面...');
-            // 这里可以添加实际的支付逻辑
-            setTimeout(() => {
-                showToast('会员开通成功！');
-                closeRechargeModal();
-            }, 2000);
-        }
-
-        function closeVideoModal() {
-            document.getElementById('videoModal').classList.remove('show');
-        }
-
-        async function generateVideo() {
-            const model = document.getElementById('videoModel').value;
-            const digitalHuman = document.getElementById('digitalHuman').value;
-            const voiceStyle = document.getElementById('voiceStyle').value;
-            const script = currentScheme;
-
-            if (!script) {
-                showToast('请先生成文案再生成视频');
-                return;
-            }
-
-            // 检查使用次数限制
-            const isMember = false; // 这里需要从后端获取会员状态
-            const todayUsage = {
-                '2.0': 0, // 这里需要从后端获取今日使用次数
-                '1.8': 0
-            };
-
-            const limit = isMember ? (model === '2.0' ? 10 : 25) : (model === '2.0' ? 1 : 2);
-
-            if (todayUsage[model] >= limit) {
-                showToast('使用次数不足，请升级会员获取更多使用次数');
-                showRechargeModal();
-                return;
-            }
-
-            // 显示加载状态
-            const generateBtn = document.querySelector('.modal-footer .btn-primary');
-            const originalText = generateBtn.innerHTML;
-            generateBtn.innerHTML = '⏳ 生成中...';
-            generateBtn.disabled = true;
-
-            try {
-                // 这里需要替换为实际的Sedance API调用
-                const response = await fetch('/api/video/generate', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        user_id: USER_ID,
-                        model: model,
-                        digital_human: digitalHuman,
-                        voice_style: voiceStyle,
-                        script: script
-                    })
-                });
-
-                const data = await response.json();
-                if (data.code === 200) {
-                    showToast('视频生成成功！');
-                    closeVideoModal();
-                } else {
-                    showToast('生成失败: ' + (data.msg || '服务器错误'));
-                }
-            } catch (error) {
-                showToast('请求失败，请检查网络连接');
-                console.error(error);
-            } finally {
-                generateBtn.innerHTML = originalText;
-                generateBtn.disabled = false;
-            }
-        }
-
-        // 初始化
-        window.onload = init;
-    </script>
+    <script src="./js/app-core.js"></script>
+    <script src="./js/script-generator.js"></script>
+    <script src="./js/modal-manager.js"></script>
+    <script src="./js/video.js"></script>
 </body>
 </html>
