@@ -925,7 +925,7 @@
 
     <!-- 历史记录模态框 -->
     <div class="modal" id="historyModal">
-        <div class="modal-content" style="max-height: 80vh; overflow-y: auto;">
+        <div class="modal-content" style="max-height: 80vh;">
             <div class="modal-header">
                 <h3 class="modal-title">历史记录</h3>
                 <button class="modal-close" onclick="closeHistoryModal()">×</button>
@@ -988,12 +988,12 @@
 
     <!-- 文档页面模态框 -->
     <div class="modal" id="docsModal">
-        <div class="modal-content" style="max-width: 800px;">
+        <div class="modal-content" style="max-width: 800px; max-height: 80vh;">
             <div class="modal-header">
                 <h3 class="modal-title">使用文档</h3>
                 <button class="modal-close" onclick="closeDocsModal()">×</button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" style="max-height: 60vh; overflow-y: auto;">
                 <div style="padding: 20px;">
                     <h4 style="color: var(--primary); margin-bottom: 16px; font-size: 18px;">快速开始</h4>
                     <ol style="margin-bottom: 24px; color: var(--text-secondary); padding-left: 20px;">
