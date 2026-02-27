@@ -787,6 +787,7 @@
                 <a href="#" class="nav-link" onclick="showFeatures()">功能</a>
                 <a href="#" class="nav-link" onclick="showDocs()">文档</a>
                 <a href="#" class="nav-link" onclick="showAbout()">关于</a>
+                <a href="#" class="nav-link" onclick="showRechargeModal()">💎 会员</a>
             </div>
             <div class="user-section">
                 <span class="user-name" id="userNameDisplay">创作者</span>
@@ -880,6 +881,7 @@
                     <div class="result-actions">
                         <button class="action-btn" onclick="showHistory()">📋 历史</button>
                         <button class="action-btn" onclick="showFavorites()">❤️ 收藏</button>
+                        <button class="action-btn" onclick="showVideoModal()">🎬 生成视频</button>
                     </div>
                 </div>
 
@@ -1049,6 +1051,83 @@
             </div>
             <div class="modal-footer">
                 <button class="btn-secondary" onclick="closeAboutModal()">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 视频生成模态框 -->
+    <div class="modal" id="videoModal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3 class="modal-title">🎬 生成数字人视频</h3>
+                <button class="modal-close" onclick="closeVideoModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div style="padding: 20px;">
+                    <div class="form-item">
+                        <label class="label">选择模型</label>
+                        <select id="videoModel">
+                            <option value="2.0">Seedance 2.0 </option>
+                            <option value="1.8">Seedance 1.8 </option>
+                        </select>
+                    </div>
+                    <div class="form-item">
+                        <label class="label">数字人形象</label>
+                        <select id="digitalHuman">
+                            <option value="default">默认形象</option>
+                            <option value="female1">女性形象1</option>
+                            <option value="male1">男性形象1</option>
+                            <option value="female2">女性形象2</option>
+                            <option value="male2">男性形象2</option>
+                        </select>
+                    </div>
+                    <div class="form-item">
+                        <label class="label">配音风格</label>
+                        <select id="voiceStyle">
+                            <option value="female">女声</option>
+                            <option value="male">男声</option>
+                            <option value="child">童声</option>
+                        </select>
+                    </div>
+                    <div style="margin-top: 20px; padding: 16px; background: var(--primary-light); border-radius: 8px;">
+                        <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 8px;">📊 今日使用次数：</p>
+                        <p style="color: var(--primary); font-weight: 600;">Seedance 2.0：0/1次 | Seedance 1.8：0/2次</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeVideoModal()">取消</button>
+                <button class="btn-primary" onclick="generateVideo()">生成视频</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 充值模态框 -->
+    <div class="modal" id="rechargeModal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3 class="modal-title">💎 开通会员</h3>
+                <button class="modal-close" onclick="closeRechargeModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div style="padding: 20px; text-align: center;">
+                    <div style="width: 120px; height: 120px; background: var(--primary-gradient); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 48px; margin: 0 auto 24px;">
+                        ✨
+                    </div>
+                    <h4 style="color: var(--primary); margin-bottom: 16px; font-size: 24px;">会员特权</h4>
+                    <div style="margin-bottom: 24px;">
+                        <p style="font-size: 20px; font-weight: 600; color: var(--primary); margin-bottom: 12px;">9.9元/月</p>
+                        <div style="text-align: left; padding: 20px; background: var(--secondary); border-radius: 8px;">
+                            <p style="margin-bottom: 8px; color: var(--text-secondary);">✅ 10次 Sedance 2.0 使用次数</p>
+                            <p style="margin-bottom: 8px; color: var(--text-secondary);">✅ 25次 Sedance 1.8 使用次数</p>
+                            <p style="margin-bottom: 8px; color: var(--text-secondary);">✅ 无广告体验</p>
+                            <p style="margin-bottom: 8px; color: var(--text-secondary);">✅ 优先使用新功能</p>
+                        </div>
+                    </div>
+                    <button class="btn-primary" onclick="processRecharge()" style="width: 100%; padding: 16px; font-size: 16px;">
+                        💳 立即开通
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -1426,6 +1505,110 @@
 
         function closeAboutModal() {
             document.getElementById('aboutModal').classList.remove('show');
+        }
+
+        // 视频生成功能
+        function showVideoModal() {
+            if (!currentScheme) {
+                showToast('请先生成文案再生成视频');
+                return;
+            }
+            const modal = document.getElementById('videoModal');
+            modal.classList.add('show');
+            modal.onclick = function(e) {
+                if (e.target === modal) {
+                    closeVideoModal();
+                }
+            };
+        }
+
+        function showRechargeModal() {
+            const modal = document.getElementById('rechargeModal');
+            modal.classList.add('show');
+            modal.onclick = function(e) {
+                if (e.target === modal) {
+                    closeRechargeModal();
+                }
+            };
+        }
+
+        function closeRechargeModal() {
+            document.getElementById('rechargeModal').classList.remove('show');
+        }
+
+        function processRecharge() {
+            showToast('正在跳转到支付页面...');
+            // 这里可以添加实际的支付逻辑
+            setTimeout(() => {
+                showToast('会员开通成功！');
+                closeRechargeModal();
+            }, 2000);
+        }
+
+        function closeVideoModal() {
+            document.getElementById('videoModal').classList.remove('show');
+        }
+
+        async function generateVideo() {
+            const model = document.getElementById('videoModel').value;
+            const digitalHuman = document.getElementById('digitalHuman').value;
+            const voiceStyle = document.getElementById('voiceStyle').value;
+            const script = currentScheme;
+
+            if (!script) {
+                showToast('请先生成文案再生成视频');
+                return;
+            }
+
+            // 检查使用次数限制
+            const isMember = false; // 这里需要从后端获取会员状态
+            const todayUsage = {
+                '2.0': 0, // 这里需要从后端获取今日使用次数
+                '1.8': 0
+            };
+
+            const limit = isMember ? (model === '2.0' ? 10 : 25) : (model === '2.0' ? 1 : 2);
+
+            if (todayUsage[model] >= limit) {
+                showToast('使用次数不足，请升级会员获取更多使用次数');
+                showRechargeModal();
+                return;
+            }
+
+            // 显示加载状态
+            const generateBtn = document.querySelector('.modal-footer .btn-primary');
+            const originalText = generateBtn.innerHTML;
+            generateBtn.innerHTML = '⏳ 生成中...';
+            generateBtn.disabled = true;
+
+            try {
+                // 这里需要替换为实际的Sedance API调用
+                const response = await fetch('/api/video/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: USER_ID,
+                        model: model,
+                        digital_human: digitalHuman,
+                        voice_style: voiceStyle,
+                        script: script
+                    })
+                });
+
+                const data = await response.json();
+                if (data.code === 200) {
+                    showToast('视频生成成功！');
+                    closeVideoModal();
+                } else {
+                    showToast('生成失败: ' + (data.msg || '服务器错误'));
+                }
+            } catch (error) {
+                showToast('请求失败，请检查网络连接');
+                console.error(error);
+            } finally {
+                generateBtn.innerHTML = originalText;
+                generateBtn.disabled = false;
+            }
         }
 
         // 初始化

@@ -270,8 +270,8 @@ def create_script(req: CreateScriptRequest):
     # 2. 按时长匹配镜头数量
     duration_map = {
         "15秒": 3,
-        "30秒": 5,
-        "60秒": 8
+        "30秒": 6,
+        "60秒": 12
     }
     shot_count = duration_map.get(req.duration, 5)
     
@@ -388,11 +388,53 @@ def delete_script(script_id: str, user_id: str):
     conn.commit()
     cursor.close()
     conn.close()
-    
-    return {
-        "code": 200,
-        "msg": "删除成功"
-    }
+    return {"code": 200, "msg": "删除成功"}
+
+# ------------------- 新增接口：生成数字人视频 -------------------
+@app.post("/api/video/generate")
+def generate_video(request: dict):
+    user_id = request.get('user_id')
+    model = request.get('model', '2.0')
+    digital_human = request.get('digital_human', 'default')
+    voice_style = request.get('voice_style', 'female')
+    script = request.get('script', '')
+
+    if not user_id or not script:
+        return {"code": 400, "msg": "参数不全"}
+
+    try:
+        # 这里需要替换为实际的Sedance API调用
+        import requests
+        import json
+
+        # 示例：调用Sedance API
+        sedance_api_url = "https://api.sedance.com/v1/video/generate"
+        sedance_api_key = "YOUR_SEDANCE_API_KEY"  # 需要替换为实际的API Key
+
+        payload = {
+            "model": f"sedance-{model}",
+            "digital_human": digital_human,
+            "voice_style": voice_style,
+            "script": script
+        }
+
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {sedance_api_key}"
+        }
+
+        # 这里暂时返回模拟数据
+        return {
+            "code": 200,
+            "msg": "视频生成成功",
+            "data": {
+                "video_url": "https://example.com/video.mp4",
+                "model": model,
+                "digital_human": digital_human
+            }
+        }
+    except Exception as e:
+        return {"code": 500, "msg": f"生成失败: {str(e)}"}
 
 # ------------------- 收藏接口 -------------------
 # 添加收藏
